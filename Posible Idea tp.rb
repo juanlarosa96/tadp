@@ -46,6 +46,14 @@ class MiSuite
     return proc { |var| lista.include? var }
   end
 
+  def method_missing(symbol, *args)
+     if symbol.to_s[0..3] == "ser_"
+       mensaje = symbol.to_s[4..(symbol.to_s.length-1)] + "?"
+       return proc {|var| var.send(mensaje.to_sym)}
+     end
+    super
+  end
+
 	#Ejemplo Codigo para Correr
 	mitest = MiSuite.new
 
