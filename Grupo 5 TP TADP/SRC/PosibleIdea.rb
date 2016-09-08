@@ -56,6 +56,18 @@ class MiSuite
     return proc { |var|  var.respond_to? symbol }
   end
 
+  def self.explotar_con(exception)
+    return proc {|bloque|
+      begin
+        bloque.call
+        return false
+
+      rescue Exception => e
+        return e.is_a? exception
+      end
+    }
+  end
+
   #Ejemplo Codigo para Correr
   mitest = MiSuite.new
 
