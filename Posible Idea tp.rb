@@ -17,6 +17,16 @@ class MiSuite
 		
 	end
 
+  def self.no_ser(argumento)
+		if(argumento.is_a? Proc)
+			puts "Es un bloque"
+			return proc { |param|  (!(argumento.call param)) }
+		else
+			puts "No es un bloque, es un Objeto"
+			return proc  {|param|  !(param.equal? argumento) }
+		end
+	end
+
 	# Hay que Decidir pasarlo a Object o Class o donde sea
 	def deberia(proc)
 		# Put para Debug, iria sin el Put
