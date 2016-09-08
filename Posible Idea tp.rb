@@ -36,8 +36,11 @@ class MiSuite
 	# Iria a Mixin de Suites
 	def self.mayor_a(parametro)
 		return proc { |var|  var > parametro }
-	end
+  end
 
+  def self.menor_a(parametro)
+    return proc { |var|  var < parametro }
+  end
 
 	#Ejemplo Codigo para Correr
 	mitest = MiSuite.new
