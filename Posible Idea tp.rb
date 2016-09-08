@@ -42,6 +42,10 @@ class MiSuite
     return proc { |var|  var < parametro }
   end
 
+  def self.uno_de_estos(lista)
+    return proc { |var| lista.include? var }
+  end
+
 	#Ejemplo Codigo para Correr
 	mitest = MiSuite.new
 
