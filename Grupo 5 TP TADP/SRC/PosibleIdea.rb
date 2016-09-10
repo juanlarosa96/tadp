@@ -5,6 +5,8 @@ class MiSuite
     @jaja = 1
   end
 
+
+
   # TODO Iria a Mixin de Suites
   def self.ser(argumento)
     # Tiene varios Puts para Debug y Pruebas
@@ -23,6 +25,15 @@ class MiSuite
 
   end
 
+
+  #TODO FIXEAR MENSAJE TENER
+  def self.tener(argumento, val)
+    puts argumento.class
+    proc {self.(argumento).equal? val }
+  end
+
+
+
   # TODO Hay que Decidir pasarlo a Object o Class o donde sea
   def deberia(proc)
     #FIXME Put para Debug, iria sin los Put
@@ -30,26 +41,40 @@ class MiSuite
     puts puts
   end
 
+
+
   # TODO Iria a Mixin de Suites
   def self.mayor_a(parametro)
     return proc { |var|  var > parametro }
   end
 
+
+
   def self.menor_a(parametro)
     return proc { |var|  var < parametro }
   end
+
+
 
   def self.uno_de_estos(lista)
     return proc { |var| lista.include? var }
   end
 
+
+
   def method_missing(symbol, *args)
     if symbol.to_s[0..3] == "ser_"
       mensaje = symbol.to_s[4..(symbol.to_s.length-1)] + "?"
       return proc {|var| var.send(mensaje.to_sym)}
-    end
+    else if symbol.to_s[0..5] == "tener_"        #AGREGO LOCURA PARA EL tener_, hay que mejorar la anidacion de ifs?
+      mensaje = '@' + symbol.to_s[6..(symbol.to_s.length-1)] + '?'
+      return proc {|var| var.send(mensaje.to_sym)}
+         end
     super
+    end
   end
+
+
 
   # TODO Iria a Mixin de Suites
   def self.entender(symbol)
@@ -68,6 +93,8 @@ class MiSuite
     }
   end
 
+
+
   #Ejemplo Codigo para Correr
   mitest = MiSuite.new
 
@@ -83,4 +110,6 @@ class MiSuite
   # Da True
   mitest.deberia entender :deberia
 
+  mitest.deberia tener_hola 2
 end
+

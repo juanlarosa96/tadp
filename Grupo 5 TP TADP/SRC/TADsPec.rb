@@ -3,7 +3,7 @@ require_relative "../SRC/NuestraSuite"
 class TADsPec
 
   def self.es_suite_testing(clase)
-    return clase.is_a? NuestraSuite
+    return clase.is_a? Nuestra  Suite
   end
 
 
