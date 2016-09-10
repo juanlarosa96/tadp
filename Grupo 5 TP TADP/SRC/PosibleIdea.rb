@@ -1,3 +1,5 @@
+require_relative "../SRC/FalloTest"
+
 class MiSuite
 
   def initialize()
@@ -12,21 +14,27 @@ class MiSuite
     puts argumento.class
 
     # Discrimino Comportamiento segun Sea un Proc o un Objeto
-    if argumento.is_a? Proc
+    if argumento.respond_to? :call
       # FIXME Borrar Puts para debug
       puts "Es un bloque"
-      return proc { |param|  true.equal?(argumento.call param) }
+      return proc   { |param|   resultado = argumento.call param
+                                raise FalloTest.new("Se esperaba 'True' pero llego '#{resultado.to_s}'") unless true.equal?(resultado)
+                    }
     else
       puts "No es un bloque, es un Objeto"
-      return proc  {|param|  param.equal? argumento }
+      return proc   {|param|
+                              raise FalloTest.new("Se esperaba '#{param.to_s}' pero llego '#{argumento.to_s}'") unless param.equal? argumento
+                    }
     end
 
   end
 
   # TODO Hay que Decidir pasarlo a Object o Class o donde sea
   def deberia(proc)
+    resultado = proc.call self
+
     #FIXME Put para Debug, iria sin los Put
-    puts proc.call self
+    puts resultado
     puts puts
   end
 
@@ -71,16 +79,19 @@ class MiSuite
   #Ejemplo Codigo para Correr
   mitest = MiSuite.new
 
-  # Explora porque comparamos 2 cosas distintas
+  # Explota porque comparamos 2 cosas distintas
   # mitest.deberia ser mayor_a 6
 
   # Da True
   mitest.deberia ser mitest
 
-  # Da False
-  mitest.deberia ser 9
-
   # Da True
   mitest.deberia entender :deberia
+
+  # Da False (Excepcion)
+  mitest.deberia ser proc { false }
+
+  # Da False (Excepcion)
+  mitest.deberia ser 9
 
 end
