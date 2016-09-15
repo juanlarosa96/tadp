@@ -35,7 +35,7 @@ class TADsPec
 
   def self.testear_test(instancia_suite, un_test)
     begin
-      instancia_suite.send un_test
+      instancia_suite.send :un_test
 
     # Si se ejecuta sin problemas, lo considero bien, sino tira una excepcion y salta mas abajo
       puts "    Ejecuto Bien '#{un_test.to_s}'"
