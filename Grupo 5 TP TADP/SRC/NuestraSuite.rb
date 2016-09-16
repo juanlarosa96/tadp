@@ -16,6 +16,17 @@ module NuestraSuite
 
   end
 
+  def tener_con_val(param, val)
+    mensaje = ("@" + param).to_sym
+    if (instance_variable_defined? mensaje) and (instance_variable_get(mensaje).equal? val)
+      #Aca meteria el proc que devuelve
+    elsif instance_variable_defined? mensaje #Desde aca verifico x cual de los motivos rompio --> MEJORAR
+      "rompi por val"
+    else
+      "rompi por msj"
+    end
+  end
+
   def mayor_a(parametro)
     return proc { |var|  var > parametro }
   end
@@ -35,6 +46,10 @@ module NuestraSuite
     end
     super
   end
+
+#  def tener(param)
+ #   return proc { |var| var.instance_variable_defined? param }
+  #end
 
   def entender(symbol)
     return proc { |var|  var.respond_to? symbol }
