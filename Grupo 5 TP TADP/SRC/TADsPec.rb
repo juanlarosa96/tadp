@@ -2,11 +2,17 @@ require_relative "../SRC/NuestraSuite"
 require_relative "../SRC/FalloTest"
 
 
+# Constantes de Resultado Ejecutar Tests
+EJECUCION_CORRECTA  = 0
+EJECUCION_FALLIDA   = 1
+EJECUCION_EXPLOTO   = 2
+
+
 class TADsPec
-  # Constantes
-  EJECUCION_CORRECTA  = 0
-  EJECUCION_FALLIDA   = 1
-  EJECUCION_EXPLOTO   = 2
+  #Devuelve la Peor Tipo de Ejecucion
+  def self.preparar_resultado(antes, ahora)
+    return antes > ahora ? antes : ahora
+  end
 
 
   def self.es_test(nombre_metodo)
@@ -35,7 +41,7 @@ class TADsPec
 
   def self.testear_test(instancia_suite, un_test)
     begin
-      instancia_suite.send :un_test
+      instancia_suite.send un_test.to_sym
 
     # Si se ejecuta sin problemas, lo considero bien, sino tira una excepcion y salta mas abajo
       puts "    Ejecuto Bien '#{un_test.to_s}'"
@@ -66,11 +72,16 @@ class TADsPec
     # Le incluyo el Mixin con los Metodos de Testing, asi tiene todos los metodos para poder testear
     instancia_suite.extend NuestraSuite
 
+    resultado_final = EJECUCION_CORRECTA    # Inicializo
+
     # Recorremos todos los Tests y vamos llamandolos, con las Excepciones controlamos la Ejecucion de estos
     tests.each { |un_test|
-      self.testear_test(instancia_suite, un_test)
+      resultado_test = self.testear_test(instancia_suite, un_test)
       # Aca seria un buen lugar para guardar resultados de los Tests si quisieramos devolvermos afuera de la ejecucion del TADsPec
+      resultado_final = self.preparar_resultado(resultado_test, resultado_final)
     }
+
+    return resultado_final
   end
 
 
@@ -88,14 +99,30 @@ class TADsPec
     end
 
     tests = self.obtener_tests(clase_suite)
-    self.testear_algunos_tests(clase_suite, tests)
+    resultado_final = self.testear_algunos_tests(clase_suite, tests)
+    return resultado_final
   end
 
 
 
   # Tipo 1: Corre todos los tests de todas las suites en contexto
   def self.testear_contexto
-    # TODO Pendiente
+    simbolos_del_contexto = Object.constants.map{ |symbol| Object.const_get symbol }
+
+    # Filtro Simbolos que son clases
+    clases_del_contexto = simbolos_del_contexto.select{ |elem| elem.is_a? Class }
+
+    # Filtro Clases Suite de Test
+    suites_del_contexto = clases_del_contexto.select { |clase| es_suite_testing(clase) }
+
+    resultado_final = EJECUCION_CORRECTA    # Inicializo
+
+    # Testeo Suites
+    suites_del_contexto.each { |suite|
+      resultado_suite = self.testear_suite(suite)
+      resultado_final = self.preparar_resultado(resultado_suite, resultado_final)
+    }
+    return resultado_final
   end
 
 
@@ -110,18 +137,20 @@ class TADsPec
 
     if args.size == 0
       # Tipo 1: Corre todos los tests de todas las suites en contexto
-      self.testear_contexto
+      resultado_final = self.testear_contexto
 
     elsif args.size == 1
       # Tipo 2: Corre todos los tests de la Suite
-      self.testear_suite(args[0])
+      resultado_final = self.testear_suite(args[0])
 
     else
       # Tipo 3: Corre Solo los tests indicados de la Suite
 
       # Quito primer argumento de la coleccion antes de pasarla al metodo (le quito la suite)
-      self.testear_algunos_tests(args[0], args.delete_at(0) )
+      resultado_final = self.testear_algunos_tests(args[0], args.delete_at(0) )
     end
+
+    return resultado_final
   end
 
 end
