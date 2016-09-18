@@ -131,7 +131,9 @@ class TADsPec
   # NOTA: Diferencio la "Sobrecarga del metodo" por los argumentos, ya que Ruby no tiene Sobrecarga como los lenguajes Estaticos
   def self.testear(*args)
     # Inyecto metodo Deberia en clase Object
-    # TODO
+    Object.send( :define_method, :deberia ) do |proc|
+      proc.call self
+    end
 
     # Primer argumento es la Suite, Los Demas son symbols a los metodos (son parte del nombre del metodo)
 
