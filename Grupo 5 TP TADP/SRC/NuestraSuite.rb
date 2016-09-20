@@ -1,3 +1,5 @@
+require_relative "../SRC/Haber_Recibido"
+
 module NuestraSuite
 
   def ser(argumento)
@@ -47,6 +49,7 @@ module NuestraSuite
        mensaje = symbol.to_s[6..(symbol.to_s.length-1)].to_sym
        return proc { |var| var.instance_variable_get(mensaje).to_sym deberia ser args[0] }
     end
+
     super(symbol, *args)
   end
 
@@ -68,6 +71,11 @@ module NuestraSuite
         return e.is_a? exception
       end
     }
+  end
+
+
+  def haber_recibido(symbol)
+    return Haber_Recibido.new(symbol)
   end
 end
 

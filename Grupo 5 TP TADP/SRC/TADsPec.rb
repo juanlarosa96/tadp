@@ -37,9 +37,18 @@ class TADsPec
     return self.tiene_tests clase
   end
 
+  def self.test_pertenece_suite(instancia_suite, un_test)
+    methods = obtener_tests(instancia_suite.class)
+    nombre_metodos = methods.map { |sym| sym.to_s}
+    return nombre_metodos.include? un_test.to_s
+  end
+
 
 
   def self.testear_test(instancia_suite, un_test)
+    #Primero Corroboramos el test pertenesca a la Suite
+    raise "El metodo '#{un_test.to_s}' no pertenece a la Suite '#{instancia_suite.class.to_s}'" unless test_pertenece_suite instancia_suite, un_test
+
     begin
       instancia_suite.send un_test
 
@@ -126,13 +135,21 @@ class TADsPec
   end
 
 
+  def self.inyectar_en_object(symbol, &block)
+    Object.send( :define_method, symbol, block )
+  end
+
 
   # Metodo para Correr tests
   # NOTA: Diferencio la "Sobrecarga del metodo" por los argumentos, ya que Ruby no tiene Sobrecarga como los lenguajes Estaticos
   def self.testear(*args)
     # Inyecto metodo Deberia en clase Object
-    Object.send( :define_method, :deberia ) do |proc|
+    self.inyectar_en_object(:deberia ) do |proc|
       proc.call self
+    end
+    # Inyecto metodo Mockear en clase Object
+    self.inyectar_en_object(:deberia ) do
+      # TODO, falta implementacion por Javier
     end
 
     Object.send( :define_method, :method_missing ) do |symbol, *args| if symbol.to_s[0..3] == "ser_"
