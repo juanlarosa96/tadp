@@ -41,7 +41,7 @@ class TADsPec
 
   def self.testear_test(instancia_suite, un_test)
     begin
-      instancia_suite.send un_test.to_sym
+      instancia_suite.send un_test
 
     # Si se ejecuta sin problemas, lo considero bien, sino tira una excepcion y salta mas abajo
       puts "    Ejecuto Bien '#{un_test.to_s}'"
@@ -133,6 +133,17 @@ class TADsPec
     # Inyecto metodo Deberia en clase Object
     Object.send( :define_method, :deberia ) do |proc|
       proc.call self
+    end
+
+    Object.send( :define_method, :method_missing ) do |symbol, *args| if symbol.to_s[0..3] == "ser_"
+      mensaje = symbol.to_s[4..(symbol.to_s.length-1)] + "?"
+      return proc { |var| var.send(mensaje.to_sym) }
+
+    elsif symbol.to_s[0..5] == "tener_"
+      mensaje = symbol.to_s[6..(symbol.to_s.length-1)].to_sym
+      return proc { |var| var.instance_variable_get(mensaje).to_sym deberia ser args[0] }
+    end
+    super(symbol, *args)
     end
 
     # Primer argumento es la Suite, Los Demas son symbols a los metodos (son parte del nombre del metodo)
