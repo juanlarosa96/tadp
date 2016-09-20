@@ -1,5 +1,4 @@
 module NuestraSuite
-  # TODO Pendiente
 
   def ser(argumento)
 
@@ -48,7 +47,7 @@ module NuestraSuite
        mensaje = symbol.to_s[6..(symbol.to_s.length-1)].to_sym
        return proc { |var| var.instance_variable_get(mensaje).to_sym deberia ser args[0] }
     end
-    super
+    super(symbol, *args)
   end
 
 #  def tener(param)
@@ -63,7 +62,8 @@ module NuestraSuite
     return proc { |bloque|
       begin
         bloque.call
-        return false
+        raise FalloTest.new("Se esperaba Excepcion '#{exception.to_s}' pero no sucedio")
+
       rescue Exception => e
         return e.is_a? exception
       end
