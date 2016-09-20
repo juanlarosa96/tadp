@@ -160,7 +160,8 @@ class TADsPec
       # Tipo 3: Corre Solo los tests indicados de la Suite
 
       # Quito primer argumento de la coleccion antes de pasarla al metodo (le quito la suite)
-      resultado_final = self.testear_algunos_tests(args[0], args.delete_at(0) )
+      largo = args.length - 1
+      resultado_final = self.testear_algunos_tests(args[0], args.pop(largo) )
     end
 
     return resultado_final
