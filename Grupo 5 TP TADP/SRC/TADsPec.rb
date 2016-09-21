@@ -139,6 +139,13 @@ class TADsPec
     Object.send( :define_method, symbol, block )
   end
 
+  def self.desmockear
+
+
+
+
+  end
+
 
   # Metodo para Correr tests
   # NOTA: Diferencio la "Sobrecarga del metodo" por los argumentos, ya que Ruby no tiene Sobrecarga como los lenguajes Estaticos
@@ -148,9 +155,21 @@ class TADsPec
       proc.call self
     end
     # Inyecto metodo Mockear en clase Object
-    self.inyectar_en_object(:deberia ) do
-      # TODO, falta implementacion por Javier
+    self.inyectar_en_object(:mockear ) do |nombre_del_metodo, &block|
+      self.class.class_eval do
+        alias_method "mock_#{nombre_del_metodo}".to_sym, nombre_del_metodo.to_sym
+      end
+      self.define_singleton_method(nombre_del_metodo.to_sym) { block.call }
     end
+
+    self.inyectar_en_object(:desmockear ) do #!!!!!!!!!!!!ver bien esta
+      metodos_mockeados = self.methods.select { |elem| elem.to_s[0..4] == "mock_" }.map {|elem| elem.to_s[4..(elem.to_s.length-1)]} #en este momento los metodos mockeados son los que no tienen la palabra mock adelante mientras que los posta se "presistieron" con la palabra mock adelante
+      metodos_mockeados.each { |un_metodo_mockeado|
+        remove_method un_metodo_mockeado
+        alias_method un_metodo_mockeado, ":mock_#{un_metodo_mockeado.to_s}" #volvemos a la definicion original del metodo, tal cual estaba antes de ser mockeado
+      }
+    end
+
 
     Object.send( :define_method, :method_missing ) do |symbol, *args| if symbol.to_s[0..3] == "ser_"
       mensaje = symbol.to_s[4..(symbol.to_s.length-1)] + "?"

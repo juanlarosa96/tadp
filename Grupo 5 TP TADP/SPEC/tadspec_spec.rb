@@ -30,6 +30,49 @@ describe 'Framework de Testing' do
 
   end
 
+
+
+  class PersonaMock
+
+    def comer
+      "mmm..."
+    end
+
+    def caminar
+      "falta mucho"
+    end
+
+
+
+  end
+
+  def mockear(nombre_del_metodo, &block)
+    self.class.class_eval do
+      alias_method "mock_#{nombre_del_metodo}".to_sym, nombre_del_metodo.to_sym
+    end
+    self.define_singleton_method(nombre_del_metodo.to_sym) { block.call }
+  end
+
+
+
+
+  it 'probando mock' do #testeamos y funciono, sacarlo de aca y dejarlo solo en TADsPec
+    #Object.send( :define_method, symbol, block )
+    Object.send( :define_method, :mockear) do |nombre_del_metodo, &block|
+    self.class.class_eval do
+      alias_method "mock_#{nombre_del_metodo}".to_sym, nombre_del_metodo.to_sym
+    end
+    self.define_singleton_method(nombre_del_metodo.to_sym) { block.call }
+  end
+    persona = PersonaMock.new
+    puts(persona.caminar)
+    persona.mockear(:caminar) do "454545454554" end
+   # puts(persona.mock_caminar)
+    puts(persona.caminar)
+
+    expect(true).to eq(true)
+  end
+
   it 'Rspec Funciona Bien' do
     expect(true).to eq(true)
   end
