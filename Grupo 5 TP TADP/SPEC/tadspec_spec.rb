@@ -20,7 +20,21 @@ describe 'Framework de Testing' do
     javee = Persona.new
     javee.tener_onda true
     end
+
   end
+
+  class SuiteDePruebaQueFalla
+
+    def testear_que_test_explota
+      raise "ERROR"
+    end
+
+    def testear_que_test_falla
+      1.deberia ser 2
+    end
+
+  end
+
 
   class ClaseNoSuite
 
@@ -91,11 +105,36 @@ describe 'Framework de Testing' do
   end
 
   it 'Deberia Ejecutar Bien al Correr Todas las Suites del Contexto' do
-    expect(TADsPec.testear_contexto).to eq(EJECUCION_CORRECTA)
+    expect(TADsPec.testear).to eq(EJECUCION_EXPLOTO)
   end
 
-  it 'asdadadsdaddads' do
+  it 'Deberia ejecturar un test especifico de una Suite' do
     expect { TADsPec.testear SuiteDePrueba, :testear_que_funciona_el_tener}.to_not raise_error
+  end
+
+  it 'Deberia ejecturar una lista de test de una Suite' do
+    expect { TADsPec.testear SuiteDePrueba, :testear_que_funciona_el_tener, :testear_que_funciona }.to_not raise_error
+  end
+
+  it 'Ejecuta un test y muestra que exploto' do
+    expect( TADsPec.testear SuiteDePruebaQueFalla, :testear_que_test_explota ).to eq(EJECUCION_EXPLOTO)
+  end
+
+  it 'Ejecuta un test y muestra que fallo' do
+    expect( TADsPec.testear SuiteDePruebaQueFalla, :testear_que_test_falla ).to eq(EJECUCION_FALLIDA)
+  end
+
+  it 'Mockeo una clase y devuelve el resultado mockeado' do
+    TADsPec.inyectarMetodos # Para que inyecte metodo mockear
+    ClaseNoSuite.mockear(:saludar) do 'Metodo mockeado' end
+    expect( ClaseNoSuite.new.saludar ).to eq('Metodo mockeado')
+  end
+
+  it 'Desmockeo una clase y vuelve al estado original' do
+  TADsPec.inyectarMetodos # Para que inyecte metodo mockear
+  ClaseNoSuite.mockear(:saludar) do 'Metodo mockeado' end
+  ClaseNoSuite.desmockear
+  expect( ClaseNoSuite.new.saludar ).to eq('Hello World')
   end
 
 end
