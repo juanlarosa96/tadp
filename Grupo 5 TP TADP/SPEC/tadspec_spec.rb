@@ -49,7 +49,7 @@ describe 'Framework de Testing' do
   class PersonaMock
 
     def comer
-      "mmm..."
+      puts "mmm..."
     end
 
     def caminar
@@ -160,10 +160,17 @@ describe 'Framework de Testing' do
   end
 
   it 'Desmockeo una clase y vuelve al estado original' do
-  TADsPec.inyectarMetodos # Para que inyecte metodo mockear
-  ClaseNoSuite.mockear(:saludar) do 'Metodo mockeado' end
-  ClaseNoSuite.desmockear
-  expect( ClaseNoSuite.new.saludar ).to eq('Hello World')
+    TADsPec.inyectarMetodos # Para que inyecte metodo mockear
+    ClaseNoSuite.mockear(:saludar) do 'Metodo mockeado' end
+    ClaseNoSuite.desmockear
+    expect( ClaseNoSuite.new.saludar ).to eq('Hello World')
+  end
+
+  it 'espiar' do
+    persona = Persona.new
+    persona.extend PersonaMock
+    persona.comer
+    puts("HOLA")
   end
 
 end

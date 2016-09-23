@@ -142,13 +142,6 @@ class TADsPec
     Module.send( :define_method, symbol, block )
   end
 
-  def self.desmockear
-
-
-
-
-  end
-
 
   # Metodo para Correr tests
   # NOTA: Diferencio la "Sobrecarga del metodo" por los argumentos, ya que Ruby no tiene Sobrecarga como los lenguajes Estaticos
@@ -187,11 +180,13 @@ class TADsPec
       self.send(:define_method, nombre_del_metodo.to_sym) do block.call end
     end
 
-    self.inyectar_en_module(:desmockear ) do #!!!!!!!!!!!!ver bien esta
-      metodos_mockeados = self.methods.select { |elem| elem.to_s[0..4] == "mock_" }.map {|elem| elem.to_s[4..(elem.to_s.length-1)]} #en este momento los metodos mockeados son los que no tienen la palabra mock adelante mientras que los posta se "presistieron" con la palabra mock adelante
+    self.inyectar_en_module(:desmockear ) do
+      metodos_mockeados = self.instance_methods.select { |elem| elem.to_s[0..4] == "mock_" }
+      puts metodos_mockeados
       metodos_mockeados.each { |un_metodo_mockeado|
+        puts un_metodo_mockeado.to_s[5..(un_metodo_mockeado.to_s.length-1)].to_sym
+        alias_method un_metodo_mockeado.to_s[5..(un_metodo_mockeado.to_s.length-1)].to_sym, un_metodo_mockeado.to_sym
         remove_method un_metodo_mockeado
-        alias_method un_metodo_mockeado, ":mock_#{un_metodo_mockeado.to_s}" #volvemos a la definicion original del metodo, tal cual estaba antes de ser mockeado
       }
     end
 
