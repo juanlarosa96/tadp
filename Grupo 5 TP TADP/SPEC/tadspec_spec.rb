@@ -69,27 +69,27 @@ describe 'Framework de Testing' do
 
   class Spy
     attr_reader :metodos_llamados
-    def initialize(clase_a_espiar) #en realidad es un objeto, no nos afecta
-      @clase_posta = clase_a_espiar.new
+    def initialize(objeto_a_espiar)
+      @objeto_a_espiar = objeto_a_espiar
       @metodos_llamados ||= []
     end
 
     def method_missing(symbol, *args)
 
       set_trace_func proc { |event, file, line, id, binding, classname| #set_trace_func escucha los llamados a cualquier funcion tod0 el tiempo por eso filtramos mas abajo
-       if (classname.to_s == @clase_posta.class.name && event.to_s == "call")
+       if (classname.to_s == @objeto_a_espiar.class.name && event.to_s == "call")
          @metodos_llamados << id #tenemos un tema con los argumentos, cuando se llama a una funcion dentro de otra el
          # set_trace_func la escucha pero los argumentos (ver si hay otra manera de conseguirlos, hoy los estamos sacando del method_missig, sino no seria necesario usarlo)
          # son los que tiene por paramteros el method_missing y estan desactualizados no nos estaria sirviendo
        end
       }
-      @clase_posta.send(symbol, *args)
+      @objeto_a_espiar.send(symbol, *args)
     end
 
   end
 
   it 'espiarrrrrrr'do
-    persona_espiada = Spy.new PersonaMock #esto lo deberia hacer la suite ej Spy.new PersonaMock = espiar(PersonaMock)
+    persona_espiada = Spy.new PersonaMock.new #esto lo deberia hacer la suite ej Spy.new PersonaMock.new = espiar(PersonaMock.new)
 
     persona_espiada.caminar
     persona_espiada.sumar(8,2)
