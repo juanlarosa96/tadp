@@ -56,17 +56,46 @@ describe 'Framework de Testing' do
       "falta mucho"
     end
 
-
-
-  end
-
-  def mockear(nombre_del_metodo, &block)
-    self.class.class_eval do
-      alias_method "mock_#{nombre_del_metodo}".to_sym, nombre_del_metodo.to_sym
+    def sumar(n1, n2)
+      n1 + n2
+      felicitar
     end
-    self.define_singleton_method(nombre_del_metodo.to_sym) { block.call }
+
+     def felicitar
+       "congratulations"
+    end
+
   end
 
+  class Spy
+    attr_reader :metodos_llamados
+    def initialize(clase_a_espiar) #en realidad es un objeto, no nos afecta
+      @clase_posta = clase_a_espiar.new
+      @metodos_llamados ||= []
+    end
+
+    def method_missing(symbol, *args)
+
+      set_trace_func proc { |event, file, line, id, binding, classname| #set_trace_func escucha los llamados a cualquier funcion tod0 el tiempo por eso filtramos mas abajo
+       if (classname.to_s == @clase_posta.class.name && event.to_s == "call")
+         @metodos_llamados << id #tenemos un tema con los argumentos, cuando se llama a una funcion dentro de otra el
+         # set_trace_func la escucha pero los argumentos (ver si hay otra manera de conseguirlos, hoy los estamos sacando del method_missig, sino no seria necesario usarlo)
+         # son los que tiene por paramteros el method_missing y estan desactualizados no nos estaria sirviendo
+       end
+      }
+      @clase_posta.send(symbol, *args)
+    end
+
+  end
+
+  it 'espiarrrrrrr'do
+    persona_espiada = Spy.new PersonaMock #esto lo deberia hacer la suite ej Spy.new PersonaMock = espiar(PersonaMock)
+
+    persona_espiada.caminar
+    persona_espiada.sumar(8,2)
+
+    expect(persona_espiada.metodos_llamados).to eq([:caminar,:sumar,:felicitar]) #tmb esta felicitar porque lo llama sumar
+  end
 
 
 
