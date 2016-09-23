@@ -46,10 +46,10 @@ describe 'Framework de Testing' do
 
 
 
-  class PersonaMock
+  module PersonaMock
 
     def comer
-      "mmm..."
+      puts "mmm..."
     end
 
     def caminar
@@ -59,16 +59,6 @@ describe 'Framework de Testing' do
 
 
   end
-
-  def mockear(nombre_del_metodo, &block)
-    self.class.class_eval do
-      alias_method "mock_#{nombre_del_metodo}".to_sym, nombre_del_metodo.to_sym
-    end
-    self.define_singleton_method(nombre_del_metodo.to_sym) { block.call }
-  end
-
-
-
 
   it 'probando mock' do #testeamos y funciono, sacarlo de aca y dejarlo solo en TADsPec
     #Object.send( :define_method, symbol, block )
@@ -131,10 +121,17 @@ describe 'Framework de Testing' do
   end
 
   it 'Desmockeo una clase y vuelve al estado original' do
-  TADsPec.inyectarMetodos # Para que inyecte metodo mockear
-  ClaseNoSuite.mockear(:saludar) do 'Metodo mockeado' end
-  ClaseNoSuite.desmockear
-  expect( ClaseNoSuite.new.saludar ).to eq('Hello World')
+    TADsPec.inyectarMetodos # Para que inyecte metodo mockear
+    ClaseNoSuite.mockear(:saludar) do 'Metodo mockeado' end
+    ClaseNoSuite.desmockear
+    expect( ClaseNoSuite.new.saludar ).to eq('Hello World')
+  end
+
+  it 'espiar' do
+    persona = Persona.new
+    persona.extend PersonaMock
+    persona.comer
+    puts("HOLA")
   end
 
 end
