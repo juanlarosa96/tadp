@@ -7,6 +7,10 @@ describe 'Framework de Testing' do
 
   class Persona
     @onda = true
+
+    def viejo?
+      true
+    end
   end
 
   class SuiteDePrueba
@@ -20,6 +24,11 @@ describe 'Framework de Testing' do
     def testear_que_funciona_el_tener
     javee = Persona.new
     javee.tener_onda true
+    end
+
+    def testear_que_persona_es_vieja
+      persona = Persona.new
+      persona.deberia ser_viejo
     end
 
   end
@@ -132,6 +141,10 @@ describe 'Framework de Testing' do
 
   it 'Deberia Ejecutar Bien la Suite Entera' do
     expect(TADsPec.testear SuiteDePrueba).to eq(EJECUCION_CORRECTA)
+  end
+
+  it 'Deberia Ejecutar Bien el ser_' do
+    expect(TADsPec.testear SuiteDePrueba, :testear_que_persona_es_vieja).to eq(EJECUCION_CORRECTA)
   end
 
   it 'Deberia Ejecutar Bien al Correr Todas las Suites del Contexto' do
