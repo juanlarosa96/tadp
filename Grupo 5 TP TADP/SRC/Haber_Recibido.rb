@@ -19,17 +19,23 @@ class Haber_Recibido
 
   def call(contexto)
     # TODO obtener del contexto los metodos que recibio, cuantas veces y con que argumentos
-
+    llamdas = contexto.llamadasAMetodos
     if self.argumentos.size > 0
       # Verifico si el metodo fue llamado con esos argumentos
-      # TODO
 
-      raise FalloTest.new("El metodo '#{symbol.to_s}' nunca fue llamado con los argumentos '#{argumentos}'") unless true
+
+      llamadas = llamadas.select do |llamada|  llamada[0].equal?(@mensaje) and llamada[1..-1].equals(@argumentos)
+      end
+      raise FalloTest.new("El metodo '#{symbol.to_s}' nunca fue llamado con los argumentos '#{argumentos}'")
+      unless llamadas.length > 0
+
+      end
+
     else
       # Verifico cantidad veces que fue llamado el metodo
       # TODO
-
-      raise FalloTest.new("El metodo '#{symbol.to_s}' no fue llamado '#{cantidad_veces}' veces") unless true
+      llamadas = llamadas.select do |llamada|  llamada[0].equal?(@mensaje) end
+      raise FalloTest.new("El metodo '#{symbol.to_s}' no fue llamado '#{cantidad_veces}' veces") unless llamadas.length >= @cantidad_veces
     end
   end
 
