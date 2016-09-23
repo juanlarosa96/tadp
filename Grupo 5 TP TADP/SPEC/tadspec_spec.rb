@@ -1,5 +1,6 @@
 require "rspec"
 require_relative "../SRC/TADsPec"
+require_relative "../SRC/Espia"
 
 describe 'Framework de Testing' do
   # Suite para probar
@@ -57,12 +58,12 @@ describe 'Framework de Testing' do
     end
 
     def sumar(n1, n2)
-      n1 + n2
+      puts(n1 + n2)
       felicitar
     end
 
      def felicitar
-       "congratulations"
+       puts("congratulations")
     end
 
   end
@@ -171,6 +172,12 @@ describe 'Framework de Testing' do
     persona.extend PersonaMock
     persona.comer
     puts("HOLA")
+  end
+
+  it 'pruebo espia' do
+    persona = Espiador.new(PersonaMock.new)
+    persona.sumar(1,2)
+    puts("Metodos llamados: #{persona.llamadasAMetodos}")
   end
 
 end
