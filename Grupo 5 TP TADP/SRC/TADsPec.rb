@@ -147,6 +147,8 @@ class TADsPec
   # NOTA: Diferencio la "Sobrecarga del metodo" por los argumentos, ya que Ruby no tiene Sobrecarga como los lenguajes Estaticos
   def self.testear(*args)
 
+    inyectarMetodos
+
     # Primer argumento es la Suite, Los Demas son symbols a los metodos (son parte del nombre del metodo)
 
     if args.size == 0
