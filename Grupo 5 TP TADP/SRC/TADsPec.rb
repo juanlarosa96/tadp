@@ -199,9 +199,9 @@ class TADsPec
         if symbol.to_s[0..3] == "ser_"
         mensaje = symbol.to_s[4..(symbol.to_s.length-1)] + "?"
         return proc { |var| var.send(mensaje.to_sym) }
-      elsif symbol.to_s[0..5] == "tener_"
+        elsif symbol.to_s[0..5] == "tener_"
         mensaje = symbol.to_s[6..(symbol.to_s.length-1)].to_sym
-        return proc { |var| var.instance_variable_get(mensaje).to_sym deberia ser args[0] }
+        return proc { |var| var.instance_variable_get("@#{mensaje}".to_sym).deberia ser args[0] }
       end
       super(symbol, *args)
     end

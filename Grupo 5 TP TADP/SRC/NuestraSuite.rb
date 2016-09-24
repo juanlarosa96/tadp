@@ -48,7 +48,7 @@ module NuestraSuite
 
       elsif symbol.to_s[0..5] == "tener_"
        mensaje = symbol.to_s[6..(symbol.to_s.length-1)].to_sym
-       return proc { |var| var.instance_variable_get(mensaje).to_sym deberia ser args[0] }
+       return proc { |var| var.instance_variable_get("@#{mensaje}".to_sym).deberia ser args[0] }
     end
 
     super(symbol, *args)
