@@ -76,15 +76,15 @@ class TADsPec
 
   # Tipo 3: Corre Solo los tests indicados de la Suite
   def self.testear_algunos_tests(clase_suite, tests)
-    # Como tenemos la Clase de Suite, tenemos que crear una instancia para poder pedirle que ejecute los metodos
-    instancia_suite = clase_suite.new
-    # Le incluyo el Mixin con los Metodos de Testing, asi tiene todos los metodos para poder testear
-    instancia_suite.extend NuestraSuite
-
     resultado_final = EJECUCION_CORRECTA    # Inicializo
 
     # Recorremos todos los Tests y vamos llamandolos, con las Excepciones controlamos la Ejecucion de estos
     tests.each { |un_test|
+      # Como tenemos la Clase de Suite, tenemos que crear una instancia para poder pedirle que ejecute los metodos
+      instancia_suite = clase_suite.new
+      # Le incluyo el Mixin con los Metodos de Testing, asi tiene todos los metodos para poder testear
+      instancia_suite.extend NuestraSuite
+
       resultado_test = self.testear_test(instancia_suite, un_test)
       # Aca seria un buen lugar para guardar resultados de los Tests si quisieramos devolvermos afuera de la ejecucion del TADsPec
       resultado_final = self.preparar_resultado(resultado_test, resultado_final)
@@ -166,6 +166,8 @@ class TADsPec
       largo = args.length - 1
       resultado_final = self.testear_algunos_tests(args[0], args.pop(largo) )
     end
+
+    # TODO llamar a Desmockear Metodos para todas las clases?
 
     return resultado_final
   end

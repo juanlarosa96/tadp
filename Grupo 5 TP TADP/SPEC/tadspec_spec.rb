@@ -6,10 +6,16 @@ describe 'Framework de Testing' do
   # Suite para probar
 
   class Persona
-    @onda = true
+    attr_accessor  :edad, :onda
+
+
+    def initialize(edad_persona)
+      self.edad = edad_persona
+      self.onda = true
+    end
 
     def viejo?
-      true
+      self. edad  > 29
     end
   end
 
@@ -20,15 +26,50 @@ describe 'Framework de Testing' do
       true.deberia ser true
     end
 
-
-    def testear_que_funciona_el_tener
-    javee = Persona.new
-    javee.tener_onda true
+    def testear_que_funcionan_aserciones
+      7.deberia ser  7
+      leandro = Persona.new(22)
+      leandro. edad. deberia ser mayor_a  20
+      leandro. edad. deberia ser menor_a  25
+      leandro. edad. deberia ser uno_de_estos  [ 7, 22, "hola"]
     end
 
-    def testear_que_persona_es_vieja
-      persona = Persona.new
-      persona.deberia ser_viejo
+    def testear_que_funciona_ser_guion
+      nico = Persona.new(30)
+      nico.deberia ser_viejo
+      nico.viejo?.deberia ser  true
+    end
+
+    def testear_que_funciona_entender
+      leandro = Persona.new(22)
+      leandro. deberia entender  :viejo?
+      leandro. deberia entender :class
+    end
+
+
+    def testear_que_funciona_el_tener
+    javee = Persona.new(20)
+    javee.deberia tener_onda true
+    end
+
+    def testear_que_funcione_espiar
+      pato  = Persona. new(23)
+      pato  = espiar(pato)
+      pato.viejo?
+      pato.deberia haber_recibido(:edad)
+      pato.deberia haber_recibido(:viejo?).con_argumentos
+    end
+
+    def testear_que_funcione_explotar
+      leandro = Persona.new(22)
+      proc { 7/0 }.deberia explotar_con  ZeroDivisionError
+      proc { leandro.nombre }.deberia explotar_con  NoMethodError
+      proc { leandro.nombre}.deberia explotar_con Error
+    end
+
+    def testear_que_funcione_mockear
+      ClaseNoSuite.mockear(:saludar) do 7 end
+      ClaseNoSuite.new.saludar.deberia ser 7
     end
 
   end
@@ -55,116 +96,56 @@ describe 'Framework de Testing' do
   end
 
 
-
-  class PersonaMock
-
-    def comer
-      puts "mmm..."
-    end
-
-    def caminar
-      "falta mucho"
-    end
-
-    def sumar(n1, n2)
-      puts(n1 + n2)
-      felicitar
-    end
-
-     def felicitar
-       puts("congratulations")
-    end
-
-  end
-
-  class Spy
-    attr_reader :metodos_llamados
-    def initialize(objeto_a_espiar)
-      @objeto_a_espiar = objeto_a_espiar
-      @metodos_llamados ||= []
-    end
-
-    def method_missing(symbol, *args)
-
-      set_trace_func proc { |event, file, line, id, binding, classname| #set_trace_func escucha los llamados a cualquier funcion tod0 el tiempo por eso filtramos mas abajo
-       if (classname.to_s == @objeto_a_espiar.class.name && event.to_s == "call")
-         @metodos_llamados << id #tenemos un tema con los argumentos, cuando se llama a una funcion dentro de otra el
-         # set_trace_func la escucha pero los argumentos (ver si hay otra manera de conseguirlos, hoy los estamos sacando del method_missig, sino no seria necesario usarlo)
-         # son los que tiene por paramteros el method_missing y estan desactualizados no nos estaria sirviendo
-       end
-      }
-      @objeto_a_espiar.send(symbol, *args)
-    end
-
-  end
-
-  it 'espiarrrrrrr'do
-    persona_espiada = Spy.new PersonaMock.new #esto lo deberia hacer la suite ej Spy.new PersonaMock.new = espiar(PersonaMock.new)
-
-    persona_espiada.caminar
-    persona_espiada.sumar(8,2)
-
-    expect(persona_espiada.metodos_llamados).to eq([:caminar,:sumar,:felicitar]) #tmb esta felicitar porque lo llama sumar
-  end
-
-
-
-  it 'probando mock' do #testeamos y funciono, sacarlo de aca y dejarlo solo en TADsPec
-    #Object.send( :define_method, symbol, block )
-    Object.send( :define_method, :mockear) do |nombre_del_metodo, &block|
-    self.class.class_eval do
-      alias_method "mock_#{nombre_del_metodo}".to_sym, nombre_del_metodo.to_sym
-    end
-    self.define_singleton_method(nombre_del_metodo.to_sym) { block.call }
-  end
-    persona = PersonaMock.new
-    puts(persona.caminar)
-    persona.mockear(:caminar) do "454545454554" end
-   # puts(persona.mock_caminar)
-    puts(persona.caminar)
-
-    expect(true).to eq(true)
-  end
-
   it 'Rspec Funciona Bien' do
     expect(true).to eq(true)
   end
 
-
-  it 'Deberia decir que si ya es una suite de test' do
+  it 'Reconozca Suites' do
     expect(TADsPec.es_suite_testing SuiteDePrueba).to eq(true)
   end
 
-  it 'Deberia decir que no ya que no es una suite de test' do
+  it 'Reconozca Clases No Suites' do
     expect(TADsPec.es_suite_testing ClaseNoSuite).to eq(false)
   end
 
-  it 'Deberia Ejecutar Bien la Suite Entera' do
+  it 'Ejecute Bien la Suite Entera' do
     expect(TADsPec.testear SuiteDePrueba).to eq(EJECUCION_CORRECTA)
   end
 
-  it 'Deberia Ejecutar Bien el ser_' do
-    expect(TADsPec.testear SuiteDePrueba, :testear_que_persona_es_vieja).to eq(EJECUCION_CORRECTA)
-  end
-
-  it 'Deberia Ejecutar Bien al Correr Todas las Suites del Contexto' do
+  it 'Ejecute Bien al Correr Todas las Suites del Contexto' do
     expect(TADsPec.testear).to eq(EJECUCION_EXPLOTO)
   end
 
-  it 'Deberia ejecturar un test especifico de una Suite' do
+  it 'Ejecute Bien un test especifico de una Suite' do
     expect { TADsPec.testear SuiteDePrueba, :testear_que_funciona_el_tener}.to_not raise_error
   end
 
-  it 'Deberia ejecturar una lista de test de una Suite' do
+  it 'Ejecute Bien una lista de test de una Suite' do
     expect { TADsPec.testear SuiteDePrueba, :testear_que_funciona_el_tener, :testear_que_funciona }.to_not raise_error
   end
 
-  it 'Ejecuta un test y muestra que exploto' do
+  it 'Ejecuta un test y muestra que Exploto' do
     expect( TADsPec.testear SuiteDePruebaQueFalla, :testear_que_test_explota ).to eq(EJECUCION_EXPLOTO)
   end
 
-  it 'Ejecuta un test y muestra que fallo' do
+  it 'Ejecuta un test y muestra que Fallo' do
     expect( TADsPec.testear SuiteDePruebaQueFalla, :testear_que_test_falla ).to eq(EJECUCION_FALLIDA)
+  end
+
+  it 'Funcionan Aserciones' do
+    expect(TADsPec.testear SuiteDePrueba, :testear_que_funcionan_aserciones).to eq(EJECUCION_CORRECTA)
+  end
+
+  it 'Funciona Ser_' do
+    expect(TADsPec.testear SuiteDePrueba, :testear_que_funciona_ser_guion).to eq(EJECUCION_CORRECTA)
+  end
+
+  it 'Funciona Entender' do
+    expect(TADsPec.testear SuiteDePrueba, :testear_que_funciona_entender).to eq(EJECUCION_CORRECTA)
+  end
+
+  it 'Funciona Mockear' do
+    expect(TADsPec.testear SuiteDePrueba, :testear_que_funcione_mockear).to eq(EJECUCION_CORRECTA)
   end
 
   it 'Mockeo una clase y devuelve el resultado mockeado' do
@@ -181,7 +162,7 @@ describe 'Framework de Testing' do
   end
 
   it 'espiar' do
-    persona = Persona.new
+    persona = Persona.new(20)
     persona.extend PersonaMock
     persona.comer
     puts("HOLA")
@@ -191,6 +172,10 @@ describe 'Framework de Testing' do
     persona = Espiador.new(PersonaMock.new)
     persona.sumar(1,2)
     puts("Metodos llamados: #{persona.llamadasAMetodos}")
+  end
+
+  it 'Funcione Espiar' do
+    expect(TADsPec.testear SuiteDePrueba, :testear_que_funcione_espiar).to eq(EJECUCION_CORRECTA)
   end
 
 end

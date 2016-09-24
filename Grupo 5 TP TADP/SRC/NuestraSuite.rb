@@ -1,4 +1,5 @@
 require_relative "../SRC/Haber_Recibido"
+require_relative "../SRC/Espia"
 
 module NuestraSuite
 
@@ -76,6 +77,10 @@ module NuestraSuite
 
   def haber_recibido(symbol)
     return Haber_Recibido.new(symbol)
+  end
+
+  def espiar(objeto)
+    return Espiador.new(objeto)
   end
 end
 
