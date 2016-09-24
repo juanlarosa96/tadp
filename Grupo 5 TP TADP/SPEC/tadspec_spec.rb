@@ -9,7 +9,7 @@ describe 'Framework de Testing' do
     attr_accessor  :edad, :onda
 
 
-    def initialize(edad_persona=20)
+    def initialize(edad_persona)
       self.edad = edad_persona
       self.onda = true
     end
