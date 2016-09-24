@@ -9,7 +9,7 @@ describe 'Framework de Testing' do
     attr_accessor  :edad, :onda
 
 
-    def initialize(edad_persona)
+    def initialize(edad_persona=20)
       self.edad = edad_persona
       self.onda = true
     end
@@ -17,6 +17,7 @@ describe 'Framework de Testing' do
     def viejo?
       self. edad  > 29
     end
+
   end
 
   class SuiteDePrueba
@@ -53,18 +54,22 @@ describe 'Framework de Testing' do
     end
 
     def testear_que_funcione_espiar
-      pato  = Persona. new(23)
+      pato  = Persona.new(23)
       pato  = espiar(pato)
       pato.viejo?
+      pato.edad=20
+      pato.edad=21
       pato.deberia haber_recibido(:edad)
       pato.deberia haber_recibido(:viejo?).con_argumentos
+      pato.deberia haber_recibido(:edad=).con_argumentos(20)
+      pato.deberia haber_recibido(:edad=).veces(2)
     end
 
     def testear_que_funcione_explotar
       leandro = Persona.new(22)
       proc { 7/0 }.deberia explotar_con  ZeroDivisionError
       proc { leandro.nombre }.deberia explotar_con  NoMethodError
-      proc { leandro.nombre}.deberia explotar_con Error
+      proc { leandro.nombre}.deberia explotar_con StandardError
     end
 
     def testear_que_funcione_mockear
@@ -83,6 +88,36 @@ describe 'Framework de Testing' do
     def testear_que_test_falla
       1.deberia ser 2
     end
+
+    def testear_que_falla_veces_espiar
+      pato  = Persona.new(23)
+      pato  = espiar(pato)
+      pato.edad=20
+      pato.edad=21
+      pato.deberia haber_recibido(:edad)
+
+      pato.deberia haber_recibido(:edad=).veces(3)
+    end
+
+    def testear_que_falla_con_argumentos_espiar
+      pato  = Persona.new(23)
+      pato  = espiar(pato)
+      pato.edad=20
+      pato.edad=21
+      pato.deberia haber_recibido(:edad=).con_argumentos(22)
+
+    end
+
+    def testear_que_falla_explotar
+      proc { 7/0 }.deberia explotar_con  NoMethodError
+    end
+
+    def testear_que_falla_entender
+      leandro = Persona.new(22)
+      leandro.deberia entender :metodo_inexistente
+
+    end
+
 
   end
 
@@ -160,7 +195,7 @@ describe 'Framework de Testing' do
     expect(TADsPec.testear SuiteDePrueba, :testear_que_funciona_entender).to eq(EJECUCION_CORRECTA)
   end
 
-  it 'Funciona Mockear' do
+  it 'Mockeo una clase y se ejecuta el bloque asignado al mock' do
     expect(TADsPec.testear SuiteDePrueba, :testear_que_funcione_mockear).to eq(EJECUCION_CORRECTA)
   end
 
@@ -172,13 +207,7 @@ describe 'Framework de Testing' do
     expect( ClaseNoSuite.new.saludar ).to eq('Hello World')
   end
 
-  it 'pruebo espia' do
-    persona = Espiador.new(PersonaMock.new)
-    persona.sumar(1,2)
-    puts("Metodos llamados: #{persona.llamadasAMetodos}")
-  end
-
-  it 'Funcione Espiar' do
+  it 'Espio un objeto y se registran correctamente los metodos llamados' do
     expect(TADsPec.testear SuiteDePrueba, :testear_que_funcione_espiar).to eq(EJECUCION_CORRECTA)
   end
 
