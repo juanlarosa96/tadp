@@ -18,17 +18,6 @@ module NuestraSuite
 
   end
 
-  def tener_con_val(param, val)
-    atributo = ("@" + param).to_sym
-    if (instance_variable_defined? atributo) and (instance_variable_get(atributo).equal? val)
-      #Aca meteria el proc que devuelve
-    elsif instance_variable_defined? atributo #Desde aca verifico x cual de los motivos rompio --> MEJORAR
-      "rompi por val"
-    else
-      "rompi por msj"
-    end
-  end
-
   def mayor_a(parametro)
     return proc { |var| var > parametro }
   end
@@ -54,12 +43,8 @@ module NuestraSuite
     super(symbol, *args)
   end
 
-#  def tener(param)
-#   return proc { |var| var.instance_variable_defined? param }
-#end
-
   def entender(symbol)
-    return proc { |var| var.respond_to? symbol }
+    return proc { |var| raise FalloTest.new("El objeto no entiende el mensaje #{symbol}") unless var.respond_to? symbol }
   end
 
   def explotar_con(exception)
@@ -69,7 +54,9 @@ module NuestraSuite
         raise FalloTest.new("Se esperaba Excepcion '#{exception.to_s}' pero no sucedio")
 
       rescue Exception => e
-        return e.is_a? exception
+       if not(e.is_a? exception)
+         raise FalloTest.new("Se esperaba Excepcion '#{exception.to_s}' pero se produjo Excepcion #{e.class.to_s}")
+       end
       end
     }
   end
