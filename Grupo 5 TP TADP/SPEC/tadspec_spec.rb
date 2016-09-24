@@ -68,8 +68,8 @@ describe 'Framework de Testing' do
     end
 
     def testear_que_funcione_mockear
-      ClaseNoSuite.mockear(:saludar) do 7 end
-      ClaseNoSuite.new.saludar.deberia ser 7
+      ClaseNoSuite.mockear(:numerito) do 7 end
+      ClaseNoSuite.new.numerito.deberia ser 7
     end
 
   end
@@ -91,6 +91,10 @@ describe 'Framework de Testing' do
 
     def saludar
       'Hello World'
+    end
+
+    def numerito
+      8
     end
 
   end
@@ -148,18 +152,20 @@ describe 'Framework de Testing' do
     expect(TADsPec.testear SuiteDePrueba, :testear_que_funcione_mockear).to eq(EJECUCION_CORRECTA)
   end
 
-  it 'Mockeo una clase y devuelve el resultado mockeado' do
+  it 'Mockeo una clase y devuelve el resultado mockeado, la desmockeo y vuelve a la normalidad' do
     TADsPec.inyectarMetodos # Para que inyecte metodo mockear
     ClaseNoSuite.mockear(:saludar) do 'Metodo mockeado' end
     expect( ClaseNoSuite.new.saludar ).to eq('Metodo mockeado')
-  end
-
-  it 'Desmockeo una clase y vuelve al estado original' do
-    TADsPec.inyectarMetodos # Para que inyecte metodo mockear
-    ClaseNoSuite.mockear(:saludar) do 'Metodo mockeado' end
     ClaseNoSuite.desmockear
     expect( ClaseNoSuite.new.saludar ).to eq('Hello World')
   end
+
+#  it 'Desmockeo una clase y vuelve al estado original' do
+#    TADsPec.inyectarMetodos # Para que inyecte metodo mockear
+#    ClaseNoSuite.mockear(:saludar) do 'Metodo mockeado' end
+#    ClaseNoSuite.desmockear
+#    expect( ClaseNoSuite.new.saludar ).to eq('Hello World')
+#  end
 
   it 'espiar' do
     persona = Persona.new(20)
