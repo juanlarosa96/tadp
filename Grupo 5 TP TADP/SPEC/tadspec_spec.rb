@@ -118,6 +118,11 @@ describe 'Framework de Testing' do
 
     end
 
+    def testear_que_falla_haber_recibido_cuando_objeto_no_es_espiado
+      leandro = Persona.new(22)
+      leandro.edad
+      leandro.deberia haber_recibido(:edad)
+    end
 
   end
 
