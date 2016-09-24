@@ -12,7 +12,7 @@ class Espiador
         super(*args)
       end
       }
-    objeto.define_singleton_method :llamadasAMetodos do  return @llamadasAMetodos    end
+    objeto.define_singleton_method :llamadas_a_metodos_espiados do  return @llamadasAMetodos    end
     return objeto
     end
   end

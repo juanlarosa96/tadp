@@ -20,7 +20,9 @@ class Haber_Recibido
   end
 
   def call(contexto)
-    llamadas = contexto.llamadasAMetodos
+
+    raise StandardError.new("El objeto no fue espiado") unless contexto.respond_to?(:llamadas_a_metodos_espiados)
+    llamadas = contexto.llamadas_a_metodos_espiados
 
     if self.argumentos.size > 0
       # Verifico si el metodo fue llamado con esos argumentos
