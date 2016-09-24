@@ -99,6 +99,18 @@ describe 'Framework de Testing' do
 
   end
 
+  class PersonaMock
+
+    def comer
+      "mmm..."
+    end
+
+    def caminar
+      "falta mucho"
+    end
+
+  end
+
 
   it 'Rspec Funciona Bien' do
     expect(true).to eq(true)
