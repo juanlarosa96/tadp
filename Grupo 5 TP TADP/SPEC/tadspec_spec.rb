@@ -172,20 +172,6 @@ describe 'Framework de Testing' do
     expect( ClaseNoSuite.new.saludar ).to eq('Hello World')
   end
 
-#  it 'Desmockeo una clase y vuelve al estado original' do
-#    TADsPec.inyectarMetodos # Para que inyecte metodo mockear
-#    ClaseNoSuite.mockear(:saludar) do 'Metodo mockeado' end
-#    ClaseNoSuite.desmockear
-#    expect( ClaseNoSuite.new.saludar ).to eq('Hello World')
-#  end
-
-  it 'espiar' do
-    persona = Persona.new(20)
-    persona.extend PersonaMock
-    persona.comer
-    puts("HOLA")
-  end
-
   it 'pruebo espia' do
     persona = Espiador.new(PersonaMock.new)
     persona.sumar(1,2)
