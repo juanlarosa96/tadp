@@ -1,7 +1,7 @@
 require_relative "../SRC/Haber_Recibido"
 require_relative "../SRC/Espia"
 
-module NuestraSuite
+module MetodosTesting
 
   def ser(argumento)
 

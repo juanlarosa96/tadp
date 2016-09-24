@@ -1,4 +1,4 @@
-require_relative "../SRC/NuestraSuite"
+require_relative "../SRC/MetodosTesting"
 require_relative "../SRC/FalloTest"
 
 
@@ -89,7 +89,7 @@ class TADsPec
       # Como tenemos la Clase de Suite, tenemos que crear una instancia para poder pedirle que ejecute los metodos
       instancia_suite = clase_suite.new
       # Le incluyo el Mixin con los Metodos de Testing, asi tiene todos los metodos para poder testear
-      instancia_suite.extend NuestraSuite
+      instancia_suite.extend MetodosTesting
 
       resultado_test = self.testear_test(instancia_suite, un_test)
       # Aca seria un buen lugar para guardar resultados de los Tests si quisieramos devolvermos afuera de la ejecucion del TADsPec
