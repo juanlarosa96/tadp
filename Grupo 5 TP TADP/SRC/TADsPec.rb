@@ -54,6 +54,8 @@ class TADsPec
 
     # Si se ejecuta sin problemas, lo considero bien, sino tira una excepcion y salta mas abajo
       puts "    Ejecuto Bien '#{un_test.to_s}'"
+      @test_pasados +=1
+
       return EJECUCION_CORRECTA
 
     # Cuando Falla un Test sin Explotar, se controla con una excepcion nuestra
@@ -61,6 +63,8 @@ class TADsPec
       puts "    Fallo Test '#{un_test.to_s}'"
       puts e.message
       puts e.backtrace.inspect
+
+      @test_fallados +=1
       return EJECUCION_FALLIDA
 
     # Cualquier Otra Excepcion considero que Exploto el test
@@ -68,6 +72,8 @@ class TADsPec
       puts "    Exploto Test '#{un_test.to_s}'"
       puts e.message
       puts e.backtrace.inspect
+
+      @test_explotados +=1
       return EJECUCION_EXPLOTO
     end
   end
@@ -149,6 +155,10 @@ class TADsPec
 
     inyectarMetodos
 
+    @test_pasados = 0
+    @test_fallados = 0
+    @test_explotados = 0
+
     # Primer argumento es la Suite, Los Demas son symbols a los metodos (son parte del nombre del metodo)
 
     if args.size == 0
@@ -168,6 +178,10 @@ class TADsPec
     end
 
     # TODO llamar a Desmockear Metodos para todas las clases?
+
+    printf("\nTest totales:#{@test_explotados+@test_fallados+@test_pasados}\n Test pasados:#{@test_pasados}\n Test fallados:#{@test_fallados}\n Test explotados:#{@test_explotados}\n")
+
+
 
     return resultado_final
   end
