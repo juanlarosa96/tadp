@@ -186,9 +186,7 @@ class TADsPec
 
     self.inyectar_en_module(:desmockear ) do
       metodos_mockeados = self.instance_methods.select { |elem| elem.to_s[0..4] == "mock_" }
-      puts metodos_mockeados
       metodos_mockeados.each { |un_metodo_mockeado|
-        puts un_metodo_mockeado.to_s[5..(un_metodo_mockeado.to_s.length-1)].to_sym
         alias_method un_metodo_mockeado.to_s[5..(un_metodo_mockeado.to_s.length-1)].to_sym, un_metodo_mockeado.to_sym
         remove_method un_metodo_mockeado
       }
