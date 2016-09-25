@@ -1,12 +1,6 @@
 require_relative "../SRC/MetodosTesting"
 require_relative "../SRC/FalloTest"
-
-
-# Constantes de Resultado Ejecutar Tests
-EJECUCION_CORRECTA  = 0
-EJECUCION_FALLIDA   = 1
-EJECUCION_EXPLOTO   = 2
-
+require_relative "../SRC/Resultados"
 
 class TADsPec
   #Devuelve la Peor Tipo de Ejecucion
@@ -53,28 +47,15 @@ class TADsPec
       instancia_suite.send un_test
 
     # Si se ejecuta sin problemas, lo considero bien, sino tira una excepcion y salta mas abajo
-      puts "    Ejecuto Bien '#{un_test.to_s}'"
-      @test_pasados +=1
-
-      return EJECUCION_CORRECTA
+      return Resultado.new(un_test, instancia_suite.class, EJECUCION_CORRECTA)
 
     # Cuando Falla un Test sin Explotar, se controla con una excepcion nuestra
     rescue FalloTest => e
-      puts "    Fallo Test '#{un_test.to_s}'"
-      puts e.message
-      puts e.backtrace.inspect
-
-      @test_fallados +=1
-      return EJECUCION_FALLIDA
+      return Resultado.new(un_test, instancia_suite.class, EJECUCION_FALLIDA, e)
 
     # Cualquier Otra Excepcion considero que Exploto el test
     rescue Exception => e
-      puts "    Exploto Test '#{un_test.to_s}'"
-      puts e.message
-      puts e.backtrace.inspect
-
-      @test_explotados +=1
-      return EJECUCION_EXPLOTO
+      return Resultado.new(un_test, instancia_suite.class, EJECUCION_EXPLOTO, e)
     end
   end
 
@@ -82,7 +63,7 @@ class TADsPec
 
   # Tipo 3: Corre Solo los tests indicados de la Suite
   def self.testear_algunos_tests(clase_suite, tests)
-    resultado_final = EJECUCION_CORRECTA    # Inicializo
+    resultados_final = Resultados.new
 
     # Recorremos todos los Tests y vamos llamandolos, con las Excepciones controlamos la Ejecucion de estos
     tests.each { |un_test|
@@ -92,19 +73,16 @@ class TADsPec
       instancia_suite.extend MetodosTesting
 
       resultado_test = self.testear_test(instancia_suite, un_test)
-      # Aca seria un buen lugar para guardar resultados de los Tests si quisieramos devolvermos afuera de la ejecucion del TADsPec
-      resultado_final = self.preparar_resultado(resultado_test, resultado_final)
+      resultados_final.agregar resultado_test
     }
 
-    return resultado_final
+    return resultados_final
   end
 
 
 
   # Tipo 2: Corre todos los tests de la Suite
   def self.testear_suite(clase_suite)
-    puts "Corriendo Tests de Suite '#{clase_suite.to_s}'"
-
     if not es_suite_testing clase_suite
       raise "No es una Suite de Testing"
     end
@@ -114,14 +92,16 @@ class TADsPec
     end
 
     tests = self.obtener_tests(clase_suite)
-    resultado_final = self.testear_algunos_tests(clase_suite, tests)
-    return resultado_final
+    resultados_final = self.testear_algunos_tests(clase_suite, tests)
+    return resultados_final
   end
 
 
 
   # Tipo 1: Corre todos los tests de todas las suites en contexto
   def self.testear_contexto
+    resultados_final = Resultados.new
+
     simbolos_del_contexto = Object.constants.map{ |symbol| Object.const_get symbol }
 
     # Filtro Simbolos que son clases
@@ -130,14 +110,12 @@ class TADsPec
     # Filtro Clases Suite de Test
     suites_del_contexto = clases_del_contexto.select { |clase| es_suite_testing(clase) }
 
-    resultado_final = EJECUCION_CORRECTA    # Inicializo
-
     # Testeo Suites
     suites_del_contexto.each { |suite|
-      resultado_suite = self.testear_suite(suite)
-      resultado_final = self.preparar_resultado(resultado_suite, resultado_final)
+        resultados_suite = self.testear_suite(suite)
+        resultados_final.unir_resultados(resultados_suite)
     }
-    return resultado_final
+    return resultados_final
   end
 
 
@@ -152,46 +130,42 @@ class TADsPec
   # Metodo para Correr tests
   # NOTA: Diferencio la "Sobrecarga del metodo" por los argumentos, ya que Ruby no tiene Sobrecarga como los lenguajes Estaticos
   def self.testear(*args)
+    resultados_final = Resultados.new
 
-    inyectarMetodos
-
-    @test_pasados = 0
-    @test_fallados = 0
-    @test_explotados = 0
+    inyectar_metodos
 
     # Primer argumento es la Suite, Los Demas son symbols a los metodos (son parte del nombre del metodo)
-
     if args.size == 0
       # Tipo 1: Corre todos los tests de todas las suites en contexto
-      resultado_final = self.testear_contexto
+      resultados_final = self.testear_contexto
 
     elsif args.size == 1
       # Tipo 2: Corre todos los tests de la Suite
-      resultado_final = self.testear_suite(args[0])
+      resultados_final = self.testear_suite(args[0])
 
     else
       # Tipo 3: Corre Solo los tests indicados de la Suite
 
       # Quito primer argumento de la coleccion antes de pasarla al metodo (le quito la suite)
-      largo = args.length - 1
-      resultado_final = self.testear_algunos_tests(args[0], args.pop(largo) )
+      ultimo = args.length - 1
+      resultados_final = self.testear_algunos_tests(args[0], args.pop(ultimo) )
     end
 
     # TODO llamar a Desmockear Metodos para todas las clases?
 
-    printf("\nTest totales:#{@test_explotados+@test_fallados+@test_pasados}\n Test pasados:#{@test_pasados}\n Test fallados:#{@test_fallados}\n Test explotados:#{@test_explotados}\n")
+    #Imprimo Reporte Resultados
+    resultados_final.imprimir
 
-
-
-    return resultado_final
+    return resultados_final
   end
 
-  def self.inyectarMetodos
+  def self.inyectar_metodos
 
     # Inyecto metodo Deberia en clase Object
     self.inyectar_en_object(:deberia ) do |proc|
       proc.call self
     end
+
     # Inyecto metodo Mockear en clase Object
     self.inyectar_en_module(:mockear ) do |nombre_del_metodo, &block|
       alias_method "mock_#{nombre_del_metodo}".to_sym, nombre_del_metodo.to_sym
@@ -209,13 +183,15 @@ class TADsPec
 
     Object.send( :define_method, :method_missing ) do |symbol, *args|
         if symbol.to_s[0..3] == "ser_"
-        mensaje = symbol.to_s[4..(symbol.to_s.length-1)] + "?"
-        return proc { |var| var.send(mensaje.to_sym) }
+          mensaje = symbol.to_s[4..(symbol.to_s.length-1)] + "?"
+          return proc { |var| var.send(mensaje.to_sym) }
+
         elsif symbol.to_s[0..5] == "tener_"
-        mensaje = symbol.to_s[6..(symbol.to_s.length-1)].to_sym
-        return proc { |var| var.instance_variable_get("@#{mensaje}".to_sym).deberia ser args[0] }
-      end
-      super(symbol, *args)
+           mensaje = symbol.to_s[6..(symbol.to_s.length-1)].to_sym
+            return proc { |var| var.instance_variable_get("@#{mensaje}".to_sym).deberia ser args[0] }
+        end
+
+        super(symbol, *args)
     end
   end
 

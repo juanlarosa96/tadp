@@ -164,24 +164,28 @@ describe 'Framework de Testing' do
     expect(TADsPec.es_suite_testing ClaseNoSuite).to eq(false)
   end
 
-  it 'Ejecute Bien la Suite Entera' do
+  it 'Ejecute Bien la Suite que Funciona' do
     expect(TADsPec.testear SuiteDePrueba).to eq(EJECUCION_CORRECTA)
   end
 
+  it 'Ejecute y Explote la Suite que Explota' do
+    expect(TADsPec.testear SuiteDePruebaQueFalla).to eq(EJECUCION_EXPLOTO)
+  end
+
   it 'Ejecute Bien al Correr Todas las Suites del Contexto' do
-    expect(TADsPec.testear).to eq(EJECUCION_EXPLOTO)
+    expect{TADsPec.testear}.to_not raise_error
   end
 
   it 'Ejecute Bien un test especifico de una Suite' do
-    expect { TADsPec.testear SuiteDePrueba, :testear_que_funciona_el_tener}.to_not raise_error
+    expect(TADsPec.testear SuiteDePrueba, :testear_que_funciona_el_tener).to eq(EJECUCION_CORRECTA)
   end
 
   it 'Ejecute Bien una lista de test de una Suite' do
-    expect { TADsPec.testear SuiteDePrueba, :testear_que_funciona_el_tener, :testear_que_funciona }.to_not raise_error
+    expect(TADsPec.testear SuiteDePrueba, :testear_que_funciona_el_tener, :testear_que_funciona).to eq(EJECUCION_CORRECTA)
   end
 
   it 'Ejecuta un test y muestra que Exploto' do
-    expect( TADsPec.testear SuiteDePruebaQueFalla, :testear_que_test_explota ).to eq(EJECUCION_EXPLOTO)
+    expect(TADsPec.testear SuiteDePruebaQueFalla, :testear_que_test_explota ).to eq(EJECUCION_EXPLOTO)
   end
 
   it 'Ejecuta un test y muestra que Fallo' do
@@ -205,7 +209,7 @@ describe 'Framework de Testing' do
   end
 
   it 'Mockeo una clase y devuelve el resultado mockeado, la desmockeo y vuelve a la normalidad' do
-    TADsPec.inyectarMetodos # Para que inyecte metodo mockear
+    TADsPec.inyectar_metodos # Para que inyecte metodo mockear
     ClaseNoSuite.mockear(:saludar) do 'Metodo mockeado' end
     expect( ClaseNoSuite.new.saludar ).to eq('Metodo mockeado')
     ClaseNoSuite.desmockear
