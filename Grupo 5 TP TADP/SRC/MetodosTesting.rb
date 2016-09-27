@@ -1,5 +1,6 @@
 require_relative "../SRC/Haber_Recibido"
 require_relative "../SRC/Espia"
+require_relative "../SRC/Evaluador"
 
 module MetodosTesting
 
@@ -7,9 +8,7 @@ module MetodosTesting
 
     # Discrimino Comportamiento segun Sea un Proc o un Objeto
     if argumento.respond_to? :call
-      return proc { |param| resultado = argumento.call param
-      raise FalloTest.new("Se esperaba 'True' pero llego '#{resultado.to_s}'") unless true.equal?(resultado)
-      }
+      return argumento
     else
       return proc { |param|
         raise FalloTest.new("Se esperaba '#{param.to_s}' pero llego '#{argumento.to_s}'") unless param.equal? argumento
@@ -19,21 +18,21 @@ module MetodosTesting
   end
 
   def mayor_a(parametro)
-    return proc { |var| var > parametro }
+    return Evaluador.mayor_a(parametro)
   end
 
   def menor_a(parametro)
-    return proc { |var| var < parametro }
+    return Evaluador.menor_a(parametro)
   end
 
-  def uno_de_estos(lista)
-    return proc { |var| lista.include? var }
+  def uno_de_estos(parametro)
+    return Evaluador.uno_de_estos(parametro)
   end
 
   def method_missing(symbol, *args)
     if symbol.to_s[0..3] == "ser_"
       mensaje = symbol.to_s[4..(symbol.to_s.length-1)] + "?"
-      return proc { |var| var.send(mensaje.to_sym) }
+      return Evaluador.ser_(mensaje)
 
       elsif symbol.to_s[0..5] == "tener_"
        mensaje = symbol.to_s[6..(symbol.to_s.length-1)].to_sym
@@ -44,21 +43,11 @@ module MetodosTesting
   end
 
   def entender(symbol)
-    return proc { |var| raise FalloTest.new("El objeto no entiende el mensaje #{symbol}") unless var.respond_to? symbol }
+    return Evaluador.entender(symbol)
   end
 
   def explotar_con(exception)
-    return proc { |bloque|
-      begin
-        bloque.call
-        raise FalloTest.new("Se esperaba Excepcion '#{exception.to_s}' pero no sucedio")
-
-      rescue Exception => e
-       if not(e.is_a? exception)
-         raise FalloTest.new("Se esperaba Excepcion '#{exception.to_s}' pero se produjo Excepcion #{e.class.to_s}")
-       end
-      end
-    }
+    return Evaluador.explotar_con(exception)
   end
 
 
