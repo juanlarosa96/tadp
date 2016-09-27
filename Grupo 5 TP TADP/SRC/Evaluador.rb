@@ -22,7 +22,12 @@ class Evaluador
   end
 
   def self.ser_(mensaje)
-    new(proc { |var| var.send(mensaje.to_sym) }, FalloTest.new("El mensaje #{mensaje} no retorna True"))
+    new(proc { |var| begin var.send(mensaje.to_sym)
+    rescue NoMethodError
+      raise FalloTest.new("El objeto no entiene el mensaje #{mensaje}")
+    end
+    true
+      }, FalloTest.new("El mensaje #{mensaje} no retorna True"))
   end
 
   def self.entender(parametro)
