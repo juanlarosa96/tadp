@@ -77,6 +77,10 @@ describe 'Framework de Testing' do
       ClaseNoSuite.new.numerito.deberia ser 7
     end
 
+    def testear_que_desmockeo
+      ClaseNoSuite.new.numerito.deberia ser 8
+    end
+
   end
 
   class SuiteDePruebaQueFalla
@@ -152,6 +156,7 @@ describe 'Framework de Testing' do
   end
 
 
+
   it 'Rspec Funciona Bien' do
     expect(true).to eq(true)
   end
@@ -204,9 +209,12 @@ describe 'Framework de Testing' do
     expect(TADsPec.testear SuiteDePrueba, :testear_que_funciona_entender).to eq(EJECUCION_CORRECTA)
   end
 
+
   it 'Mockeo una clase y se ejecuta el bloque asignado al mock' do
     expect(TADsPec.testear SuiteDePrueba, :testear_que_funcione_mockear).to eq(EJECUCION_CORRECTA)
+
   end
+
 
   it 'Mockeo una clase y devuelve el resultado mockeado, la desmockeo y vuelve a la normalidad' do
     TADsPec.inyectar_metodos # Para que inyecte metodo mockear
@@ -219,5 +227,6 @@ describe 'Framework de Testing' do
   it 'Espio un objeto y se registran correctamente los metodos llamados' do
     expect(TADsPec.testear SuiteDePrueba, :testear_que_funcione_espiar).to eq(EJECUCION_CORRECTA)
   end
+
 
 end

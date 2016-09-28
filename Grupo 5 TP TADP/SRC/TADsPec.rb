@@ -8,7 +8,6 @@ class TADsPec
     return antes > ahora ? antes : ahora
   end
 
-
   def self.es_test(nombre_metodo)
     return nombre_metodo.include? "testear_que_"
   end
@@ -74,6 +73,9 @@ class TADsPec
 
       resultado_test = self.testear_test(instancia_suite, un_test)
       resultados_final.agregar resultado_test
+      @modules_mockeados.each { |un_module| #desmockeamos los metodos
+        un_module.desmockear
+      }
     }
 
     return resultados_final
@@ -131,7 +133,7 @@ class TADsPec
   # NOTA: Diferencio la "Sobrecarga del metodo" por los argumentos, ya que Ruby no tiene Sobrecarga como los lenguajes Estaticos
   def self.testear(*args)
     resultados_final = Resultados.new
-
+    @modules_mockeados ||= []
     inyectar_metodos
 
     # Primer argumento es la Suite, Los Demas son symbols a los metodos (son parte del nombre del metodo)
@@ -156,6 +158,7 @@ class TADsPec
     #Imprimo Reporte Resultados
     resultados_final.imprimir
 
+
     return resultados_final
   end
 
@@ -169,8 +172,11 @@ class TADsPec
     # Inyecto metodo Mockear en clase Object
     self.inyectar_en_module(:mockear ) do |nombre_del_metodo, &block|
       alias_method "mock_#{nombre_del_metodo}".to_sym, nombre_del_metodo.to_sym
+      #le decimos a TADsPec que mockeamos un metodo de tal module
+      TADsPec.agregar_modules_mockeados(self)
       self.send(:define_method, nombre_del_metodo.to_sym) do block.call end
     end
+
 
     self.inyectar_en_module(:desmockear ) do
       metodos_mockeados = self.instance_methods.select { |elem| elem.to_s[0..4] == "mock_" }
@@ -193,6 +199,10 @@ class TADsPec
 
         super(symbol, *args)
     end
+  end
+
+  def self.agregar_modules_mockeados( module_mockeado )
+    @modules_mockeados << module_mockeado
   end
 
 end
