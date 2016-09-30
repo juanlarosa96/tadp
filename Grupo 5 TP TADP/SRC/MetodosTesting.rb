@@ -25,8 +25,8 @@ module MetodosTesting
     return Evaluador.menor_a(parametro)
   end
 
-  def uno_de_estos(parametro)
-    return Evaluador.uno_de_estos(parametro)
+  def uno_de_estos(*parametro)
+    return Evaluador.uno_de_estos(*parametro)
   end
 
   def method_missing(symbol, *args)

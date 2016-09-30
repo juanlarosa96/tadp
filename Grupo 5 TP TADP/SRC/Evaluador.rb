@@ -17,8 +17,15 @@ class Evaluador
     new(proc { |var| var < parametro }, FalloTest.new("El objeto no es menor a #{parametro}"))
   end
 
-  def self.uno_de_estos(parametro)
-    new(proc { |var| parametro.include? var }, FalloTest.new("El objeto no es un elemento de la lista "))
+  def self.uno_de_estos(*parametro)
+    if parametro[0].is_a? Array
+    new(proc { |var|
+
+        parametro[0].include? var }, FalloTest.new("El objeto no es un elemento de la lista "))
+    else
+      new(proc { |var|
+        parametro.include? var }, FalloTest.new("El objeto no es un elemento de la lista "))
+      end
   end
 
   def self.ser_(mensaje)
