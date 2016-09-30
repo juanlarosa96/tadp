@@ -33,6 +33,7 @@ describe 'Framework de Testing' do
       leandro. edad. deberia ser mayor_a  20
       leandro. edad. deberia ser menor_a  25
       leandro. edad. deberia ser uno_de_estos  [ 7, 22, "hola"]
+      leandro. edad. deberia ser uno_de_estos 7, 22, "hola"
     end
 
     def testear_que_funciona_ser_guion
