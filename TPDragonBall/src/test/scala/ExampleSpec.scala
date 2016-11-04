@@ -1,6 +1,8 @@
 /**
   * Created by javierz on 04/11/16.
   */
+import domain.{FuenteDeEnergia, Ki}
+
 import collection.mutable.Stack
 import org.scalatest._
 

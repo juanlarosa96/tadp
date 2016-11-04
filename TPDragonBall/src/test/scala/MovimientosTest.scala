@@ -1,6 +1,7 @@
 /**
   * Created by javierz on 04/11/16.
   */
+import domain.{CargarKi, Humano, Ki}
 import org.scalatest._
 
 class MovimientosTest extends FlatSpec with Matchers {
