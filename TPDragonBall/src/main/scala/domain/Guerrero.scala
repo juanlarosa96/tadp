@@ -1,3 +1,4 @@
+package domain
 
 trait Guerrero {
   def energiaMaxima: Int
@@ -31,7 +32,6 @@ case class Fusion(unGuerrero: Guerrero,
    val energia = Ki(unGuerrero.energia.cant + otroGuerrero.energia.cant)
    val movimientos = unGuerrero.movimientos ::: otroGuerrero.movimientos
    val items = unGuerrero.items ::: otroGuerrero.items
-
 }
 
 

@@ -1,9 +1,9 @@
-/**
-  * Created by gas on 27/10/16.
-  */
+package domain
+
 trait Movimiento {
   def realizarMovimiento(guerrero :Guerrero) :Guerrero
 }
+
 
 case object CargarKi extends Movimiento {
    def realizarMovimiento(guerrero :Guerrero)  :Guerrero = {

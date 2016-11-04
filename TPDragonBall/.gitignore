@@ -7,3 +7,10 @@
 target
 /target
 *.iml
+
+# Agrego que falto quitar del IDEA
+/project/*
+.sbt
+
+# Cosas de Eclipse
+/bin/
