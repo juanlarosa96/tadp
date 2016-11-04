@@ -14,3 +14,4 @@ target
 
 # Cosas de Eclipse
 /bin/
+.cache-main
