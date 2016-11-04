@@ -11,3 +11,4 @@ case object DeFuego extends TipoArma
 case object Roma extends TipoArma
 case object Filosa extends TipoArma
 case object Semilla extends Item
+case object Esfera extends Item
