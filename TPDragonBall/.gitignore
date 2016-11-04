@@ -13,4 +13,4 @@ target
 .sbt
 
 # Cosas de Eclipse
-
+/bin/
