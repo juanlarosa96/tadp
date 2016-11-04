@@ -1,9 +1,21 @@
-/**
-  * Created by gas on 27/10/16.
-  */
+package domain
+
+import domain.SuperSaiyajin
+
+import domain.Saiyajin
+
+import domain.Namekusein
+
+import domain.Monstruo
+
+import domain.Humano
+
+import domain.Guerrero
+
 trait Movimiento {
-  abstract def apply(guerrero :Guerrero) : Guerrero
+   def apply(guerrero :Guerrero) : Guerrero
 }
+
 
 case object CargarKi extends Movimiento {
   def apply(guerrero :Guerrero) :Guerrero = {
@@ -13,7 +25,7 @@ case object CargarKi extends Movimiento {
       case namekusein :Namekusein => namekusein.copy(energia = Ki(namekusein.energia.cant +100))
       case monstruo :Monstruo => monstruo.copy(energia = Ki(monstruo.energia.cant +100))
       case saiyajin :Saiyajin => saiyajin.copy(energia = Ki(saiyajin.energia.cant +100))
-      case _  => _
+     // case _  => _
     }
   }
 }

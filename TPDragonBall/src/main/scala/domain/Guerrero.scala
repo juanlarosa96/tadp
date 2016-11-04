@@ -1,3 +1,8 @@
+package domain
+
+import domain.Movimiento
+
+import domain.Item
 
 trait Guerrero {
   val energiaMaxima: Int
@@ -26,10 +31,12 @@ case class Saiyajin(ki: Int,
 
 case class Fusion(unGuerrero: Guerrero,
                   otroGuerrero: Guerrero) extends Guerrero {
-  var energiaMaxima: Int = null
+/*
+  var energiaMaxima: Int = ???
   var energia: FuenteDeEnergia = null
   var movimientos: List[String] = null
   var items: List[Item] = null
+ */
   def cargarKi = this
 
   def apply = {
@@ -54,7 +61,7 @@ case object Normal extends Estado
 
 // ------------------------- FUENTES DE ENERGIA --------------------------
 abstract class  FuenteDeEnergia {
-  abstract def cant :Int
+  def cant :Int
 }
 
 case class Ki(cant: Int) extends FuenteDeEnergia

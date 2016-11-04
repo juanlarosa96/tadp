@@ -1,6 +1,9 @@
+package domain
+
 import org.junit.Before
 import org.junit.Test
 import org.junit.Assert._
+import domain.Persona
 
 class PersonaTest {
   var persona: Persona = _
