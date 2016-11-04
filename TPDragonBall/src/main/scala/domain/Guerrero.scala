@@ -1,5 +1,8 @@
 package domain
 
+import enums.TipoMonstruo
+import enums.TipoMonstruo._
+
 trait Guerrero {
   def energiaMaxima: Int
   def energia: FuenteDeEnergia
@@ -18,7 +21,17 @@ trait Guerrero {
 case class Humano(energiaMaxima: Int, energia: FuenteDeEnergia, movimientos: List[Movimiento], items: List[Item]) extends Guerrero
 case class Androide(energiaMaxima: Int, energia: FuenteDeEnergia, movimientos: List[Movimiento], items: List[Item]) extends Guerrero
 case class Namekusein(energiaMaxima: Int, energia: FuenteDeEnergia, movimientos: List[Movimiento], items: List[Item]) extends Guerrero
-case class Monstruo(energiaMaxima: Int, energia: FuenteDeEnergia, movimientos: List[Movimiento], items: List[Item]) extends Guerrero
+case class Monstruo(energiaMaxima: Int, energia: FuenteDeEnergia, movimientos: List[Movimiento], items: List[Item], tipoMonstruo: TipoMonstruo) extends Guerrero {
+  def comerseAlOponente(guerrero :Option[Guerrero]) = {
+    tipoMonstruo match {
+      case TipoMonstruo.CELL =>
+        guerrero.filter{gue => gue.getClass == Androide}
+            .map{gue => this.copy(movimientos = this.movimientos ::: gue.movimientos) }
+      case TipoMonstruo.MAJIN_BUU =>
+        guerrero.map{gue => this.copy(movimientos = List(gue.movimientos.reverse.head))}
+    }
+  }
+}
 
 case class Saiyajin(ki: Int,
                     cola: Boolean,
