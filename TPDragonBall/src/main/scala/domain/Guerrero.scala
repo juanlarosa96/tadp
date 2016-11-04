@@ -2,6 +2,7 @@ package domain
 
 import enums.TipoMonstruo
 import enums.TipoMonstruo._
+import scala.util.Try
 
 trait Guerrero {
   def energiaMaxima: Int
@@ -10,11 +11,27 @@ trait Guerrero {
   def inventario: List[Item]
   def estado: Estado
 
-  def ejecutar(mov: Movimiento): Guerrero = { //como vamos a tener muchos movimientos, para esto esta mejor el poli ad-hoc
-    mov.realizarMovimiento(this)
+  
+  //Debe ser Try porque podria fallar un guerrero al intentar ejecutar algo que no deberia
+  def ejecutar(mov: Movimiento, enemigo: Guerrero): Try[Guerrero] = { //como vamos a tener muchos movimientos, para esto esta mejor el poli ad-hoc
+    mov(this, enemigo);
   }
 
   def dejarseFajar = {}
+  
+  def movimentoMasEfectivoContra(enemigo: Guerrero, unCriterio: Criterio): Movimiento = {
+    val resultados = for {
+      //Para cada Movimiento
+      mov <- this.movimientos
+      //Aplicalos al guerrero actual y al enemigo y devolveme lo que importa (depende del movimiento)
+      guerreroFinal <- mov(this, enemigo).toOption    //Solo me interesan los Guerreros que NO fallaron al ejecutar
+      //Aplico el Criterio a ver como puntua el resultado final
+      valor = unCriterio(guerreroFinal)
+    } yield (mov, valor)
+    
+    //Ordeno por Mayor puntaje segun criterio y obtengo el primero
+    return resultados.sortBy(_._2).map(_._1).reverse.head
+  }
 }
 
 // ------------------------------ TIPOS DE GUERRERO ------------------------------
