@@ -2,27 +2,63 @@
 trait Guerrero {
 
   val energiaMaxima: Int
-  var energia: FuenteDeEnergia
-  var movimientos: List[Movimiento]
-  var items: List[Item]
+  val energia: Int
+  val tipoEnergia: FuenteDeEnergia
+  val movimientos: List[Movimiento]
+  val items: List[Item]
 
   def ejecutar(mov: Movimiento): Guerrero = {
     mov match {
-      case CargarKi => cargarKi(this)
+      case CargarKi => cargarKi()
+      case DejarseFajar => dejarseFajar()
     }
   }
 
+  def dejarseFajar(): Guerrero = this
+
+  def cargarKi(): Guerrero
 
 }
 
 // ------------------------------ TIPOS DE GUERRERO ------------------------------
 
-case class Humano extends Guerrero
-case class Androide extends Guerrero
-case class Namekusein extends Guerrero
-case class Monstruo extends Guerrero
+case class Humano(energiaMaxima: Int,
+                  energia: Int,
+                  tipoEnergia: Ki,
+                  movimientos: List[Movimiento],
+                  items: List[Item]) extends Guerrero {
 
-case class Saiyajin(ki: Int,
+  override def cargarKi(): Guerrero = {
+
+    val energiaActual = energia
+    this.copy(energia = energiaActual + 100)
+  }
+}
+
+case class Androide(energiaMaxima: Int,
+                    energia: Int,
+                    tipoEnergia: Bateria,
+                    movimientos: List[Movimiento],
+                    items: List[Item]) extends Guerrero
+
+case class Namekusein(energiaMaxima: Int,
+                      energia: Int,
+                      tipoEnergia: Ki,
+                      movimientos: List[Movimiento],
+                      items: List[Item]) extends Guerrero
+
+case class Monstruo(energiaMaxima: Int,
+                    energia: Int,
+                    tipoEnergia: Ki,
+                    movimientos: List[Movimiento],
+                    items: List[Item]) extends Guerrero
+
+case class Saiyajin(energiaMaxima: Int,
+                    energia: Int,
+                    tipoEnergia: Ki,
+                    movimientos: List[Movimiento],
+                    items: List[Item],
+                    ki: Int,
                     cola: Boolean,
                     estado: Estado) extends Guerrero
 
@@ -30,9 +66,10 @@ case class Fusion(unGuerrero: Guerrero,
                   otroGuerrero: Guerrero) extends Guerrero {
 
   val energiaMaxima = unGuerrero.energiaMaxima + otroGuerrero.energiaMaxima
-  var energia = unGuerrero.energia + otroGuerrero.energia
-  var movimientos = unGuerrero.movimientos ::: otroGuerrero.movimientos
-  var items = unGuerrero.items ::: otroGuerrero.movimientos
+  val energia = unGuerrero.energia + otroGuerrero.energia
+  val tipoEnergia = Ki
+  val movimientos = unGuerrero.movimientos ::: otroGuerrero.movimientos
+  val items = unGuerrero.items ::: otroGuerrero.movimientos
 }
 
 
@@ -56,7 +93,7 @@ case object Normal extends Estado
 
 // ------------------------- FUENTES DE ENERGIA --------------------------
 
-abstract class FuenteDeEnergia
+trait FuenteDeEnergia
 
-case class Ki(cant: Int) extends FuenteDeEnergia
-case class Bateria(cant: Int) extends FuenteDeEnergia
+case object Ki extends FuenteDeEnergia
+case object Bateria extends FuenteDeEnergia
