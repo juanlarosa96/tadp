@@ -10,14 +10,18 @@ trait Movimiento { //TODO no deja cargarlos en la lista de movimientos, pero si 
 
 
 case object CargarKi extends Movimiento {
-   def apply(guerrero :Guerrero, enemigo:Guerrero) : Try[Guerrero] = {
+   def apply(guerrero: Guerrero, enemigo: Guerrero) : Try[Guerrero] = {
     guerrero match {
-      case humano :Humano =>               Try( humano.copy(         energia = Ki(humano.energia.cant +100) ) )
-      case superSaiyajin :SuperSaiyajin => Try( superSaiyajin.copy(  energia = Ki(superSaiyajin.energia.cant +150 * superSaiyajin.nivel) ) )
-      case namekusein :Namekusein =>       Try( namekusein.copy(     energia = Ki(namekusein.energia.cant +100) ) )
-      case monstruo :Monstruo =>           Try( monstruo.copy(       energia = Ki(monstruo.energia.cant +100) ) )
-      case saiyajin :Saiyajin =>           Try( saiyajin.copy(       energia = Ki(saiyajin.energia.cant +100) ) )
-      case _  => Try( guerrero )
+      case humano: Humano => Try(humano.copy(energia = Ki(humano.energia.cant +100)))
+      case namekusein: Namekusein => Try(namekusein.copy(energia = Ki(namekusein.energia.cant +100)))
+      case monstruo: Monstruo => Try(monstruo.copy(energia = Ki(monstruo.energia.cant +100)))
+      case saiyajin: Saiyajin =>
+        saiyajin.estado match {
+          case SuperSaiyajin(nivel) => Try(saiyajin.copy(energia = Ki(saiyajin.energia.cant + 150 * nivel)))
+          case _ => Try(saiyajin.copy(energia = Ki(saiyajin.energia.cant +100)))
+      }
+      case androide: Androide => Try(guerrero)
+      case _ => Try(guerrero.copy(energia = Ki(guerrero.energia.cant +100)))
     }
   }
 }
@@ -26,8 +30,8 @@ case object CargarKi extends Movimiento {
 case object Magia extends Movimiento {
   def apply(guerrero :Guerrero, enemigo:Guerrero) : Try[Guerrero] = {
     guerrero match {
-      case namekusein :Namekusein  =>  Try( namekusein.copy(  estado = Normal) ) //TODO ver eso de cambiar el estado arbritariamente, preguntar!!
-      case monstruo :Monstruo =>       Try( monstruo.copy(    estado = Normal) )
+      case namekusein :Namekusein  =>  Try(namekusein.copy(estado = Consciente)) //TODO ver eso de cambiar el estado arbritariamente, preguntar!!
+      case monstruo :Monstruo =>       Try(monstruo.copy(estado = Consciente))
       //case _  => if (guerrero.inventario.filter(_.getClass == Esfera).size >= 7) guerrero.copy(estado = Normal) else guerrero
     }
   }
