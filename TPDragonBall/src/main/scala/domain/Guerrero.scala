@@ -2,54 +2,60 @@ package domain
 
 import enums.TipoMonstruo
 import enums.TipoMonstruo._
-import domain.Tipos_Movimientos.Movimiento
+import domain.TiposMovimientos.Movimiento
 import scala.util.Try
 
 
-abstract class Guerrero() {
-  def energiaMaxima: Int
-  def energia: FuenteDeEnergia
-  def movimientos: List[Movimiento]
-  def inventario: List[Item]
-  def estado: Estado //TODO ver de sacar estado de aca, que solo lo tenga el saiyajin (y ver en ese caso, que pasa con el estado en fusion)
-  
-  //Debe ser Try porque podria fallar un guerrero al intentar ejecutar algo que no deberia
-  def ejecutar(mov: Movimiento, enemigo: Guerrero): Try[Guerrero] = { //como vamos a tener muchos movimientos, para esto esta mejor el poli ad-hoc
-    Try(  
-        mov(this, enemigo)._1  
+case class Guerrero(energiaMaxima: Int,
+                    energia: FuenteDeEnergia,
+                    movimientos: List[Movimiento],
+                    inventario: List[Item],
+                    estado: Estado) {
+
+  def ejecutar(mov: Movimiento, enemigo: Guerrero): Try[Guerrero] = {
+    Try(
+        mov(this, enemigo)._1
         )  //Obtengo al Guerrero que soy Yo, no me importa como quedo el enemigo aca
   }
 
-  //TODO ver si es necesario que sea try. Enemigo deberia ser option? Para cargarKi, x ejemplo, no se necesita un enemigo
+  def dejarseFajar: Guerrero = this
 
-  def dejarseFajar = {}
+  def alterarEstado(estadoNuevo: Estado): Guerrero = {
+    this.copy(estado = estadoNuevo)
+  }
+
+  def tiene7Esferas: Boolean = {
+    inventario.exists {
+      case esfera: Esfera => esfera.cantidad == 7
+    }
+  }
+
+  def usarEsferas: Guerrero = {
+      case esfera: Esfera if esfera.cantidad == 7 =>
+        copy(inventario = inventario.filter(_.getClass != Esfera))
+  }
 
    def tieneMunicion: Boolean = {
-    this.inventario.exists { item => item match{
-                                               case mun: Municion => mun.cantidad >= 1;
-                                               case _ => false;
-                                               }
-                                            }
-  }
-  
+     inventario.exists {
+       case mun: Municion => mun.cantidad >= 1
+     }
+   }
+
    //LEO: Idea: Podria hacerse generico a cualquier tipo de Item, tipo semilla hermitaneo. Hay que ver como pasar como parametro un tipo de clase
-  def consumirMunicion: Guerrero = {
-     var nuevoInventario = this.inventario.map { item => item match{
-                                               case mun: Municion => mun.consumir;
-                                               case otro => otro;  //No modifica los demas
-                                               }
+   def consumirMunicion: Guerrero = {
+     val nuevoInventario = this.inventario.map {
+       case mun: Municion => mun.consumir;
+       case otro => otro;  //No modifica los demas
      }
     //LEO: Falta hacer el arreglo del Copy. No me acuerdo que habian dicho en clase...
-    return this.copy(inventario = nuevoInventario);
-  }
-  
-  
+    this.copy(inventario = nuevoInventario)
+   }
+
   //Creo metodo porque se esta repitiendo todo el tiempo lo mismo
-  def cambiarEnergia( nuevoKi: Ki): Guerrero = {
-    return this.copy(energia = nuevoKi)
+  def cambiarEnergia(valor: Int): Guerrero = {
+    this.copy(energia = Ki(energia.cant + valor))
   }
-  
-  
+
   def movimentoMasEfectivoContra(enemigo: Guerrero, unCriterio: Criterio): Movimiento = {
     val resultados = for {
       //Para cada Movimiento
@@ -63,7 +69,7 @@ abstract class Guerrero() {
     //Ordeno por Mayor puntaje segun criterio y obtengo el primero
     resultados.sortBy(_._2).map(_._1).reverse.head
   }
-  
+
   def pelearRound(mov: Movimiento, enemigo: Guerrero): (Guerrero, Guerrero) = {
     mov(this, enemigo)
   }
@@ -73,10 +79,60 @@ abstract class Guerrero() {
 
 // ------------------------------ TIPOS DE GUERRERO ------------------------------
 
-case class Humano(energiaMaxima: Int, energia: FuenteDeEnergia, movimientos: List[Movimiento], inventario: List[Item], estado :Estado) extends Guerrero
-case class Androide(energiaMaxima: Int, energia: FuenteDeEnergia, movimientos: List[Movimiento], inventario: List[Item], estado :Estado) extends Guerrero
-case class Namekusein(energiaMaxima: Int, energia: FuenteDeEnergia, movimientos: List[Movimiento], inventario: List[Item], estado :Estado) extends Guerrero
-case class Monstruo(energiaMaxima: Int, energia: FuenteDeEnergia, movimientos: List[Movimiento], inventario: List[Item], estado :Estado, tipoMonstruo: TipoMonstruo) extends Guerrero {
+case class Humano(override val energiaMaxima: Int,
+                  override val energia: FuenteDeEnergia,
+                  override val movimientos: List[Movimiento],
+                  override val inventario: List[Item],
+                  override val estado :Estado) extends Guerrero(energiaMaxima: Int,
+                                                                energia: FuenteDeEnergia,
+                                                                movimientos: List[Movimiento],
+                                                                inventario: List[Item],
+                                                                estado: Estado)
+
+case class Androide(override val energiaMaxima: Int,
+                    override val energia: FuenteDeEnergia,
+                    override val movimientos: List[Movimiento],
+                    override val inventario: List[Item],
+                    override val estado :Estado) extends Guerrero(energiaMaxima: Int,
+                                                                  energia: FuenteDeEnergia,
+                                                                  movimientos: List[Movimiento],
+                                                                  inventario: List[Item],
+                                                                  estado: Estado)
+
+case class Namekusein(override val energiaMaxima: Int,
+                      override val energia: FuenteDeEnergia,
+                      override val movimientos: List[Movimiento],
+                      override val inventario: List[Item],
+                      override val estado :Estado) extends Guerrero(energiaMaxima: Int,
+                                                                    energia: FuenteDeEnergia,
+                                                                    movimientos: List[Movimiento],
+                                                                    inventario: List[Item],
+                                                                    estado: Estado)
+
+case class Saiyajin(override val energiaMaxima: Int,
+                    override val energia: FuenteDeEnergia,
+                    override val movimientos: List[Movimiento],
+                    override val inventario: List[Item],
+                    override val estado: Estado,
+                    cola: Boolean,
+                    transformacion: Transformacion) extends Guerrero(energiaMaxima: Int,
+                                                                     energia: FuenteDeEnergia,
+                                                                     movimientos: List[Movimiento],
+                                                                     inventario: List[Item],
+                                                                     estado: Estado){
+  def cortarCola = this.copy(cola = false)
+}
+
+case class Monstruo(override val energiaMaxima: Int,
+                    override val energia: FuenteDeEnergia,
+                    override val movimientos: List[Movimiento],
+                    override val inventario: List[Item],
+                    override val estado :Estado,
+                    tipoMonstruo: TipoMonstruo) extends Guerrero(energiaMaxima: Int,
+                                                                 energia: FuenteDeEnergia,
+                                                                 movimientos: List[Movimiento],
+                                                                 inventario: List[Item],
+                                                                 estado: Estado) {
 
   def comerseAlOponente(guerreroAComer: Guerrero) = { //TODO esta aca pq solo este movimiento lo hacen los mounstruos, por ahora no tiene sentido modelarlo afuera
     tipoMonstruo match {
@@ -88,25 +144,16 @@ case class Monstruo(energiaMaxima: Int, energia: FuenteDeEnergia, movimientos: L
       case TipoMonstruo.MAJIN_BUU => this.copy(movimientos = List(this.movimientos.reverse.head)) //TODO cambiar
     }
   }
+
 }
 
-case class Saiyajin(ki: Int,
-                    cola: Boolean,
-                    estado: Estado,
-                    energiaMaxima: Int,
-                    energia: FuenteDeEnergia,
-                    movimientos: List[Movimiento],
-                    inventario: List[Item],
-                    transformacion: Transformacion) extends Guerrero
 
 case class Fusion(unGuerrero: Guerrero,
-                  otroGuerrero: Guerrero) extends Guerrero {
-   def energiaMaxima = unGuerrero.energiaMaxima + otroGuerrero.energiaMaxima
-   def energia = Ki(unGuerrero.energia.cant + otroGuerrero.energia.cant)
-   def movimientos = unGuerrero.movimientos ::: otroGuerrero.movimientos
-   def inventario = unGuerrero.inventario ::: otroGuerrero.inventario
-   def estado = unGuerrero.estado
-}
+                  otroGuerrero: Guerrero) extends Guerrero(energiaMaxima = unGuerrero.energiaMaxima + otroGuerrero.energiaMaxima,
+                                                           energia = Ki(unGuerrero.energia.cant + otroGuerrero.energia.cant),
+                                                           movimientos = unGuerrero.movimientos ::: otroGuerrero.movimientos,
+                                                           inventario = unGuerrero.inventario ::: otroGuerrero.inventario,
+                                                           estado = unGuerrero.estado)
 
 // ------------------------- ESTADOS DE VIDA --------------------------
 

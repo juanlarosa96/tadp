@@ -12,60 +12,63 @@ trait Movimiento { //TODO no deja cargarlos en la lista de movimientos, pero si 
 */
 
 
-object Tipos_Movimientos {
+object TiposMovimientos {
   //LEO: Debo devolver ambos guerreros porque hay algunos movimiento que modifican a los 2
-  type Movimiento = (/*MiGuerrero*/ Guerrero, /*GuerreroEnemigo*/Guerrero) => (/*MiGuerrero*/ Guerrero, /*GuerreroEnemigo*/Guerrero)
-  
+  type Movimiento = (Guerrero, Guerrero) => (Guerrero, Guerrero)
+                   //guerrero, enemigo(Gas: Lo puse como option para probar, antes era Guerrero)
   
   val CargarKi: Movimiento = {
-   (guerrero: Guerrero, enemigo: Guerrero) =>
+   (guerrero: Guerrero, None) =>
     guerrero match {
-      case humano: Humano => ( humano.cambiarEnergia(Ki(humano.energia.cant +100)) , enemigo)
-      case namekusein: Namekusein => ( namekusein.cambiarEnergia(Ki(namekusein.energia.cant +100)) , enemigo)
-      case monstruo: Monstruo => ( monstruo.cambiarEnergia(Ki(monstruo.energia.cant +100)) , enemigo)
       case saiyajin: Saiyajin =>
-        saiyajin.estado match {
+        saiyajin.transformacion match {
+            //TODO que error ?
           //El ERROR dice que hay que diferenciar entre estados, no entre saiyayins y tiene razon, hay que implementar los estados de Saiyayin. No se quien lo estaba haciendo y si avanzo con eso
-          case SuperSaiyajin(nivel) => ( saiyajin.cambiarEnergia(Ki(saiyajin.energia.cant + 150 * nivel)) , enemigo)
-          case _ => ( saiyajin.cambiarEnergia(Ki(saiyajin.energia.cant +100)) , enemigo)
+          case SuperSaiyajin(nivel) => (saiyajin.cambiarEnergia(150 * nivel) , None)
+          case _ => (saiyajin.cambiarEnergia(100) , None)
       }
-      case androide: Androide => ( guerrero , enemigo)
-      case _ => ( guerrero.cambiarEnergia(Ki(guerrero.energia.cant +100)) , enemigo)
+      case androide: Androide => (androide, None)
+      case _ => (guerrero.cambiarEnergia(100) , None)
     }
   }
   
   //LEO: No se si lo vamos a usar, pero lo actualice
   //val DejarseFajar: Movimiento = { (guerrero: Guerrero, enemigo: Guerrero) => guerrero }
-  
+
+  //TODO ver eso de cambiar el estado arbritariamente => en vez de pasasr algun estado a alterar estado, habria que tirar random
   val Magia: Movimiento = {
     (guerrero: Guerrero, enemigo: Guerrero) =>
     guerrero match {
-      case namekusein :Namekusein  =>  ( namekusein.copy(estado = Consciente) , enemigo) //TODO ver eso de cambiar el estado arbritariamente, preguntar!!
-      case monstruo :Monstruo =>       ( monstruo.copy(estado = Consciente) , enemigo)
-      //case _  => if (guerrero.inventario.filter(_.getClass == Esfera).size >= 7) guerrero.copy(estado = Normal) else guerrero
+      case namekusein :Namekusein  => (namekusein.alterarEstado(Consciente), enemigo)
+      case monstruo :Monstruo => (monstruo.alterarEstado(Inconsciente), enemigo)
+      case otro if otro.tiene7Esferas => (otro.alterarEstado(Consciente).usarEsferas, enemigo)
     }
   }
-  
-  val UsarItem: (Item,Guerrero,Guerrero)=> (Guerrero,Guerrero) = {
+
+  //GAS: falta chequear que el guerrero tenga el item en su inventario
+  //GAS: delegar un poco en cada item (o aunque sea en arma)
+  val UsarItem: (Item, Guerrero, Guerrero) => (Guerrero, Guerrero) = {
      (item: Item, guerrero: Guerrero, enemigo: Guerrero) =>
      item match {
        case arma: Arma =>
-             arma.tipo match {
-               case arma_fuego: DeFuego => 
-                   //Veo si tiene municion para usar el arma
-                     if (guerrero.tieneMunicion) enemigo match {
-                         //Diferencion por quien es el enemigo
-                         case humano: Humano => (guerrero.consumirMunicion , humano.cambiarEnergia( Ki(humano.energia.cant - 20) )  )
-                         case namekusein :Namekusein  => namekusein.estado match {
-                           case Inconsciente => (guerrero.consumirMunicion , namekusein.cambiarEnergia( Ki(namekusein.energia.cant - 10) )  )
-                           // Y en caso de otro que hacemos? Por ahora explota
-                         }
-                         // Y en caso de otro que hacemos? Por ahora explota
-                     }
-                     //Sino, no hace nada
-                     else (guerrero, enemigo)
-                     }
-       
+         arma.tipo match {
+           case DeFuego =>
+             if (guerrero.tieneMunicion) {
+               enemigo match {
+                 case humano: Humano => (guerrero.consumirMunicion , humano.cambiarEnergia(-20))
+                 case namekusein: Namekusein if namekusein.estado == Inconsciente =>
+                   (guerrero.consumirMunicion , namekusein.cambiarEnergia(-10))
+                 case otro => (guerrero.consumirMunicion, enemigo)
+               }
+             }
+             else (guerrero, enemigo)
+           case Roma if Roma.puedeBajar(enemigo) => (guerrero, enemigo.copy(estado = Inconsciente))
+           case Filosa => enemigo match {
+             case saiyajin: Saiyajin if saiyajin.cola => (guerrero, saiyajin.cortarCola())
+             case otro => (guerrero, enemigo.cambiarEnergia(guerrero.energia.cant / 100))
+           }
+         }
+       case semilla: Semilla => (guerrero, enemigo) //TODO sacar semillas
        //TODO Pendiente las demas armas
      }
   }
