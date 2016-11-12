@@ -12,8 +12,7 @@ abstract class Guerrero() {
   def movimientos: List[Movimiento]
   def inventario: List[Item]
   def estado: Estado //TODO ver de sacar estado de aca, que solo lo tenga el saiyajin (y ver en ese caso, que pasa con el estado en fusion)
-
-
+  
   //Debe ser Try porque podria fallar un guerrero al intentar ejecutar algo que no deberia
   def ejecutar(mov: Movimiento, enemigo: Guerrero): Try[Guerrero] = { //como vamos a tener muchos movimientos, para esto esta mejor el poli ad-hoc
     Try(  
@@ -25,6 +24,32 @@ abstract class Guerrero() {
 
   def dejarseFajar = {}
 
+   def tieneMunicion: Boolean = {
+    this.inventario.exists { item => item match{
+                                               case mun: Municion => mun.cantidad >= 1;
+                                               case _ => false;
+                                               }
+                                            }
+  }
+  
+   //LEO: Idea: Podria hacerse generico a cualquier tipo de Item, tipo semilla hermitaneo. Hay que ver como pasar como parametro un tipo de clase
+  def consumirMunicion: Guerrero = {
+     var nuevoInventario = this.inventario.map { item => item match{
+                                               case mun: Municion => mun.consumir;
+                                               case otro => otro;  //No modifica los demas
+                                               }
+     }
+    //LEO: Falta hacer el arreglo del Copy. No me acuerdo que habian dicho en clase...
+    return this.copy(inventario = nuevoInventario);
+  }
+  
+  
+  //Creo metodo porque se esta repitiendo todo el tiempo lo mismo
+  def cambiarEnergia( nuevoKi: Ki): Guerrero = {
+    return this.copy(energia = nuevoKi)
+  }
+  
+  
   def movimentoMasEfectivoContra(enemigo: Guerrero, unCriterio: Criterio): Movimiento = {
     val resultados = for {
       //Para cada Movimiento
