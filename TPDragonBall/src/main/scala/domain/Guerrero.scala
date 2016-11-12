@@ -2,7 +2,9 @@ package domain
 
 import enums.TipoMonstruo
 import enums.TipoMonstruo._
+import domain.Tipos_Movimientos.Movimiento
 import scala.util.Try
+
 
 abstract class Guerrero() {
   def energiaMaxima: Int
@@ -14,7 +16,9 @@ abstract class Guerrero() {
 
   //Debe ser Try porque podria fallar un guerrero al intentar ejecutar algo que no deberia
   def ejecutar(mov: Movimiento, enemigo: Guerrero): Try[Guerrero] = { //como vamos a tener muchos movimientos, para esto esta mejor el poli ad-hoc
-    Try(  mov(this, enemigo)  )
+    Try(  
+        mov(this, enemigo)._1  
+        )  //Obtengo al Guerrero que soy Yo, no me importa como quedo el enemigo aca
   }
 
   //TODO ver si es necesario que sea try. Enemigo deberia ser option? Para cargarKi, x ejemplo, no se necesita un enemigo
@@ -34,7 +38,13 @@ abstract class Guerrero() {
     //Ordeno por Mayor puntaje segun criterio y obtengo el primero
     resultados.sortBy(_._2).map(_._1).reverse.head
   }
+  
+  def pelearRound(mov: Movimiento, enemigo: Guerrero): (Guerrero, Guerrero) = {
+    mov(this, enemigo)
+  }
 }
+
+
 
 // ------------------------------ TIPOS DE GUERRERO ------------------------------
 
