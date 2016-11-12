@@ -4,7 +4,7 @@ import enums.TipoMonstruo
 import enums.TipoMonstruo._
 import scala.util.Try
 
-abstract case class Guerrero() {
+abstract class Guerrero() {
   def energiaMaxima: Int
   def energia: FuenteDeEnergia
   def movimientos: List[Movimiento]
@@ -14,7 +14,7 @@ abstract case class Guerrero() {
 
   //Debe ser Try porque podria fallar un guerrero al intentar ejecutar algo que no deberia
   def ejecutar(mov: Movimiento, enemigo: Guerrero): Try[Guerrero] = { //como vamos a tener muchos movimientos, para esto esta mejor el poli ad-hoc
-    mov(this, enemigo)
+    Try(  mov(this, enemigo)  )
   }
 
   //TODO ver si es necesario que sea try. Enemigo deberia ser option? Para cargarKi, x ejemplo, no se necesita un enemigo
@@ -26,7 +26,7 @@ abstract case class Guerrero() {
       //Para cada Movimiento
       mov <- this.movimientos
       //Aplicalos al guerrero actual y al enemigo y devolveme lo que importa (depende del movimiento)
-      guerreroFinal <- mov(this, enemigo).toOption    //Solo me interesan los Guerreros que NO fallaron al ejecutar
+      guerreroFinal <- ejecutar(mov, enemigo).toOption    //Solo me interesan los Guerreros que NO fallaron al ejecutar
       //Aplico el Criterio a ver como puntua el resultado final
       valor = unCriterio(guerreroFinal)
     } yield (mov, valor)
