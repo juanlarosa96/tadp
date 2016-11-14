@@ -34,3 +34,12 @@ case object MovimientoNoMataUsuario extends Criterio {
     if (guerreroFinal.energia.cant >= 1) 1 else 0
   }
 }
+
+
+
+
+
+
+
+
+

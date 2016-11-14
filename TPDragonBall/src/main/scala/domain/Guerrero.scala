@@ -10,7 +10,8 @@ case class Guerrero(energiaMaxima: Int,
                     energia: FuenteDeEnergia,
                     movimientos: List[Movimiento],
                     inventario: List[Item],
-                    estado: Estado) {
+                    estado: Estado,
+                    raza: Raza) {
 
   def ejecutar(mov: Movimiento, enemigo: Guerrero): Try[Guerrero] = {
     Try(
@@ -79,61 +80,22 @@ case class Guerrero(energiaMaxima: Int,
 
 // ------------------------------ TIPOS DE GUERRERO ------------------------------
 
-case class Humano(override val energiaMaxima: Int,
-                  override val energia: FuenteDeEnergia,
-                  override val movimientos: List[Movimiento],
-                  override val inventario: List[Item],
-                  override val estado :Estado) extends Guerrero(energiaMaxima: Int,
-                                                                energia: FuenteDeEnergia,
-                                                                movimientos: List[Movimiento],
-                                                                inventario: List[Item],
-                                                                estado: Estado)
+abstract class Raza
 
-case class Androide(override val energiaMaxima: Int,
-                    override val energia: FuenteDeEnergia,
-                    override val movimientos: List[Movimiento],
-                    override val inventario: List[Item],
-                    override val estado :Estado) extends Guerrero(energiaMaxima: Int,
-                                                                  energia: FuenteDeEnergia,
-                                                                  movimientos: List[Movimiento],
-                                                                  inventario: List[Item],
-                                                                  estado: Estado)
+case object Humano extends Raza
+case object Androide extends Raza
+case object Namekusein extends Raza
 
-case class Namekusein(override val energiaMaxima: Int,
-                      override val energia: FuenteDeEnergia,
-                      override val movimientos: List[Movimiento],
-                      override val inventario: List[Item],
-                      override val estado :Estado) extends Guerrero(energiaMaxima: Int,
-                                                                    energia: FuenteDeEnergia,
-                                                                    movimientos: List[Movimiento],
-                                                                    inventario: List[Item],
-                                                                    estado: Estado)
+case class Saiyajin(cola: Boolean,
+                    transformacion: Transformacion) extends Raza {
 
-case class Saiyajin(override val energiaMaxima: Int,
-                    override val energia: FuenteDeEnergia,
-                    override val movimientos: List[Movimiento],
-                    override val inventario: List[Item],
-                    override val estado: Estado,
-                    cola: Boolean,
-                    transformacion: Transformacion) extends Guerrero(energiaMaxima: Int,
-                                                                     energia: FuenteDeEnergia,
-                                                                     movimientos: List[Movimiento],
-                                                                     inventario: List[Item],
-                                                                     estado: Estado){
   def cortarCola = this.copy(cola = false)
-  def transformarEnMono = this.copy(energiaMaxima = this.energiaMaxima*3, energia = Ki(this.energiaMaxima*3), transformacion = Mono )  
+  def transformarEnMono = this.copy(transformacion = Mono)
+  def transformarEnSuperSaiyajin(nivel: Int) = this.copy(transformacion = SuperSaiyajin(nivel))
+
 }
 
-case class Monstruo(override val energiaMaxima: Int,
-                    override val energia: FuenteDeEnergia,
-                    override val movimientos: List[Movimiento],
-                    override val inventario: List[Item],
-                    override val estado :Estado,
-                    tipoMonstruo: TipoMonstruo) extends Guerrero(energiaMaxima: Int,
-                                                                 energia: FuenteDeEnergia,
-                                                                 movimientos: List[Movimiento],
-                                                                 inventario: List[Item],
-                                                                 estado: Estado) {
+case class Monstruo(tipoMonstruo: TipoMonstruo) extends Raza {
 
   def comerseAlOponente(guerreroAComer: Guerrero) = { //TODO esta aca pq solo este movimiento lo hacen los mounstruos, por ahora no tiene sentido modelarlo afuera
     tipoMonstruo match {
