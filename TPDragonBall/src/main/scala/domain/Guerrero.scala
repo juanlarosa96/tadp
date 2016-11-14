@@ -121,6 +121,7 @@ case class Saiyajin(override val energiaMaxima: Int,
                                                                      inventario: List[Item],
                                                                      estado: Estado){
   def cortarCola = this.copy(cola = false)
+  def transformarEnMono = this.copy(energiaMaxima = this.energiaMaxima*3, energia = Ki(this.energiaMaxima*3), transformacion = Mono )  
 }
 
 case class Monstruo(override val energiaMaxima: Int,

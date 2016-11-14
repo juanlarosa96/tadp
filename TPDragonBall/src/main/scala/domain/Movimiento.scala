@@ -72,5 +72,14 @@ object TiposMovimientos {
        //TODO Pendiente las demas armas
      }
   }
+  
+  val TransformarseEnMono: (Guerrero, Guerrero) => (Guerrero, Guerrero) = {
+    (guerrero : Guerrero, None) =>
+      guerrero match{
+          case saiyajin: Saiyajin if (saiyajin.inventario.contains(FotoLuna) && saiyajin.transformacion == Mono)  => (saiyajin.transformarEnMono, None)
+          case _ => (guerrero, None)
+      }    
+  }
+
     
 }
