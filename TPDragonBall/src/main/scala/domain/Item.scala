@@ -19,6 +19,7 @@ case class Municion(cantidad: Int) extends Item {
 
 case class Arma(tipo: TipoArma) extends Item
 
+case object FotoLuna extends Item
 
 
 abstract class TipoArma
