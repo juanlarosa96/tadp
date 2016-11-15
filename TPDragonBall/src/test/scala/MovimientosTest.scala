@@ -1,17 +1,18 @@
 /**
   * Created by javierz on 04/11/16.
   */
-import domain.{Humano, Ki}
+import domain.{Consciente, Guerrero, Humano, Ki}
+import domain.Movimientos._
 import org.scalatest._
 
 class MovimientosTest extends FlatSpec with Matchers {
 
   it should "Persona carga su Ki" in {
-    val pedro = Humano(100,Ki(80),null,null)
+    val pedro = Guerrero(100,Ki(80), List(CargarKi), Nil, Consciente, Humano)
     println("pedro antes de cargar energia")
     println(pedro)
     println("pedro despues de cargar energia")
-    val pedroConEnergia = pedro.ejecutar(CargarKi)
+    val pedroConEnergia = pedro.ejecutar(CargarKi, null)
     println(pedroConEnergia)
     assert(pedroConEnergia.energia.cant == 180)
   }

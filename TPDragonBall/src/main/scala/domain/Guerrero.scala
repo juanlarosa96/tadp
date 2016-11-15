@@ -1,8 +1,9 @@
 package domain
 
+import domain.Movimientos.Movimiento
 import enums.TipoMonstruo
 import enums.TipoMonstruo._
-import domain.TiposMovimientos.Movimiento
+
 import scala.util.Try
 
 
@@ -13,10 +14,8 @@ case class Guerrero(energiaMaxima: Int,
                     estado: Estado,
                     raza: Raza) {
 
-  def ejecutar(mov: Movimiento, enemigo: Guerrero): Try[Guerrero] = {
-    Try(
+  def ejecutar(mov: Movimiento, enemigo: Guerrero): Guerrero = {
         mov(this, enemigo)._1
-        )  //Obtengo al Guerrero que soy Yo, no me importa como quedo el enemigo aca
   }
 
   def dejarseFajar: Guerrero = this
@@ -25,15 +24,14 @@ case class Guerrero(energiaMaxima: Int,
     this.copy(estado = estadoNuevo)
   }
 
-  def tiene7Esferas: Boolean = {
+  def tiene7Esferas(): Boolean = {
     inventario.exists {
       case esfera: Esfera => esfera.cantidad == 7
     }
   }
 
-  def usarEsferas: Guerrero = {
-      case esfera: Esfera if esfera.cantidad == 7 =>
-        copy(inventario = inventario.filter(_.getClass != Esfera))
+  def usarEsferas(guerrero: Guerrero): Guerrero = {
+    guerrero.copy(inventario = inventario.filter(_.getClass != Esfera))
   }
 
    def tieneMunicion: Boolean = {
@@ -56,13 +54,13 @@ case class Guerrero(energiaMaxima: Int,
   def cambiarEnergia(valor: Int): Guerrero = {
     this.copy(energia = Ki(energia.cant + valor))
   }
-
+/*
   def movimentoMasEfectivoContra(enemigo: Guerrero, unCriterio: Criterio): Movimiento = {
     val resultados = for {
       //Para cada Movimiento
       mov <- this.movimientos
       //Aplicalos al guerrero actual y al enemigo y devolveme lo que importa (depende del movimiento)
-      guerreroFinal <- ejecutar(mov, enemigo).toOption    //Solo me interesan los Guerreros que NO fallaron al ejecutar
+      guerreroFinal <- ejecutar(mov, enemigo)    //Solo me interesan los Guerreros que NO fallaron al ejecutar
       //Aplico el Criterio a ver como puntua el resultado final
       valor = unCriterio(guerreroFinal)
     } yield (mov, valor)
@@ -70,7 +68,7 @@ case class Guerrero(energiaMaxima: Int,
     //Ordeno por Mayor puntaje segun criterio y obtengo el primero
     resultados.sortBy(_._2).map(_._1).reverse.head
   }
-
+*/
   def pelearRound(mov: Movimiento, enemigo: Guerrero): (Guerrero, Guerrero) = {
     mov(this, enemigo)
   }
@@ -96,7 +94,7 @@ case class Saiyajin(cola: Boolean,
 }
 
 case class Monstruo(tipoMonstruo: TipoMonstruo) extends Raza {
-
+/*
   def comerseAlOponente(guerreroAComer: Guerrero) = { //TODO esta aca pq solo este movimiento lo hacen los mounstruos, por ahora no tiene sentido modelarlo afuera
     tipoMonstruo match {
       case TipoMonstruo.CELL =>
@@ -107,16 +105,9 @@ case class Monstruo(tipoMonstruo: TipoMonstruo) extends Raza {
       case TipoMonstruo.MAJIN_BUU => this.copy(movimientos = List(this.movimientos.reverse.head)) //TODO cambiar
     }
   }
-
+*/
 }
 
-
-case class Fusion(unGuerrero: Guerrero,
-                  otroGuerrero: Guerrero) extends Guerrero(energiaMaxima = unGuerrero.energiaMaxima + otroGuerrero.energiaMaxima,
-                                                           energia = Ki(unGuerrero.energia.cant + otroGuerrero.energia.cant),
-                                                           movimientos = unGuerrero.movimientos ::: otroGuerrero.movimientos,
-                                                           inventario = unGuerrero.inventario ::: otroGuerrero.inventario,
-                                                           estado = unGuerrero.estado)
 
 // ------------------------- ESTADOS DE VIDA --------------------------
 
