@@ -105,4 +105,15 @@ object TiposMovimientos {
           (guerrero, None)
       }
   }
+
+  def Fusion(compañero: Guerrero)(guerrero: Guerrero, enemigo: Guerrero): (Guerrero, Guerrero) = {
+    val guerreroFusionado =
+      Guerrero(energiaMaxima = guerrero.energiaMaxima + compañero.energiaMaxima,
+        energia = Ki(guerrero.energia.cant + compañero.energia.cant),
+        movimientos = guerrero.movimientos ::: compañero.movimientos,
+        inventario = guerrero.inventario ::: compañero.inventario,
+        estado = Consciente,
+        raza = null)
+    (guerreroFusionado, enemigo)
+  }
 }
