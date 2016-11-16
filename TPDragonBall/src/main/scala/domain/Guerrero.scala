@@ -1,6 +1,7 @@
 package domain
 
-import domain.Movimientos.Movimiento
+
+import domain.TiposMovimientos.Movimiento
 import enums.TipoMonstruo
 import enums.TipoMonstruo._
 
@@ -30,8 +31,8 @@ case class Guerrero(energiaMaxima: Int,
     }
   }
 
-  def usarEsferas(guerrero: Guerrero): Guerrero = {
-    guerrero.copy(inventario = inventario.filter(_.getClass != Esfera))
+  def usarEsferas: Guerrero = {
+    this.copy(inventario = inventario.filter(_.getClass != Esfera))
   }
 
    def tieneMunicion: Boolean = {

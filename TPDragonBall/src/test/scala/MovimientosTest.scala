@@ -2,7 +2,7 @@
   * Created by javierz on 04/11/16.
   */
 import domain.{Consciente, Guerrero, Humano, Ki}
-import domain.Movimientos._
+import domain.TiposMovimientos._
 import org.scalatest._
 
 class MovimientosTest extends FlatSpec with Matchers {
@@ -17,3 +17,12 @@ class MovimientosTest extends FlatSpec with Matchers {
     assert(pedroConEnergia.energia.cant == 180)
   }
 }
+
+/*
+goku.masefectivocontra(vegeta) {
+  (goku.movimientos, goku, vegeta) = for {
+    movimiento <- goku.movimientos
+
+  } yield movimiento(goku, vegeta)
+}
+*/
