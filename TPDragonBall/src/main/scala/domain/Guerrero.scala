@@ -16,7 +16,7 @@ case class Guerrero(energiaMaxima: Int,
                     raza: Raza) {
 
   def ejecutar(mov: Movimiento, enemigo: Guerrero): Guerrero = {
-        mov(this, enemigo)._1
+    mov(this, enemigo)._1
   }
 
   def dejarseFajar: Guerrero = this
@@ -55,21 +55,25 @@ case class Guerrero(energiaMaxima: Int,
   def cambiarEnergia(valor: Int): Guerrero = {
     this.copy(energia = Ki(energia.cant + valor))
   }
-/*
+
   def movimentoMasEfectivoContra(enemigo: Guerrero, unCriterio: Criterio): Movimiento = {
-    val resultados = for {
-      //Para cada Movimiento
+    val resultados: List[(Movimiento, Int)] = for {
+
+      //Por cada movimiento del guerrero
       mov <- this.movimientos
-      //Aplicalos al guerrero actual y al enemigo y devolveme lo que importa (depende del movimiento)
-      guerreroFinal <- ejecutar(mov, enemigo)    //Solo me interesan los Guerreros que NO fallaron al ejecutar
-      //Aplico el Criterio a ver como puntua el resultado final
-      valor = unCriterio(guerreroFinal)
+
+      //ejecuto movimiento
+      guerreroPostMov = this.ejecutar(mov, enemigo)
+
+      //valoro movimiento segun criterio
+      valor = unCriterio(guerreroPostMov)
+
     } yield (mov, valor)
 
     //Ordeno por Mayor puntaje segun criterio y obtengo el primero
     resultados.sortBy(_._2).map(_._1).reverse.head
   }
-*/
+
   def pelearRound(mov: Movimiento, enemigo: Guerrero): (Guerrero, Guerrero) = {
     mov(this, enemigo)
   }

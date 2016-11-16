@@ -5,9 +5,7 @@ package domain
 
 abstract class Item
 
-case class Semilla(cantidad: Int) extends Item {
-  def consumir = this.copy(cantidad - 1)
-}
+case object Semilla extends Item
 
 case class Esfera(cantidad: Int) extends Item {
   def consumir = this.copy(cantidad - 1)

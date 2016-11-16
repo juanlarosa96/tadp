@@ -32,6 +32,20 @@ object TiposMovimientos {
       }
   }
 
+  val CargarMenosKi: Movimiento = {
+    (guerrero: Guerrero, None) =>
+      guerrero.raza match {
+        case Saiyajin(cola, transformacion) =>
+          transformacion match {
+            //TODO que error ?
+            //El ERROR dice que hay que diferenciar entre estados, no entre saiyayins y tiene razon, hay que implementar los estados de Saiyayin. No se quien lo estaba haciendo y si avanzo con eso
+            case SuperSaiyajin(nivel) => (guerrero.cambiarEnergia(25 * nivel), None)
+            case _ => (guerrero.cambiarEnergia(25), None)
+          }
+        case Androide => (guerrero, None)
+        case _ => (guerrero.cambiarEnergia(25), None)
+      }
+  }
   //LEO: No se si lo vamos a usar, pero lo actualice
   //val DejarseFajar: Movimiento = { (guerrero: Guerrero, enemigo: Guerrero) => guerrero }
 
@@ -47,8 +61,10 @@ object TiposMovimientos {
 
   //GAS: falta chequear que el guerrero tenga el item en su inventario
   //GAS: delegar un poco en cada item (o aunque sea en arma)
-  val UsarItem: (Item, Guerrero, Guerrero) => (Guerrero, Guerrero) = {
-    (item: Item, guerrero: Guerrero, enemigo: Guerrero) =>
+
+  val UsarSemilla: Movimiento = UsarItem(Semilla)(_, _)
+
+  def UsarItem(item: Item)(guerrero: Guerrero, enemigo: Guerrero):  (Guerrero, Guerrero) = {
       item match {
         case arma: Arma =>
           arma.tipo match {
@@ -74,8 +90,8 @@ object TiposMovimientos {
                   (guerrero, enemigo.cambiarEnergia(guerrero.energia.cant / 100))
               }
           }
-        case semilla: Semilla =>
-          (guerrero, enemigo) //TODO sacar semillas
+        case Semilla =>
+          (guerrero.copy(energia = Ki(1000)), enemigo) //TODO sacar semillas
         //TODO Pendiente las demas armas
       }
   }

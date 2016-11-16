@@ -1,7 +1,4 @@
-/**
-  * Created by javierz on 04/11/16.
-  */
-import domain.{Consciente, Guerrero, Humano, Ki}
+import domain._
 import domain.TiposMovimientos._
 import org.scalatest._
 
@@ -16,9 +13,27 @@ class MovimientosTest extends FlatSpec with Matchers {
     println(pedroConEnergia)
     assert(pedroConEnergia.energia.cant == 180)
   }
+
+  it should "Persona elige un movimiento" in {
+    val chumbo = Arma(tipo = DeFuego)
+
+    //val usarSemilla = UsarItem(Semilla)(_,_)
+
+    val usarArma = UsarItem(chumbo)(_,_)
+
+    //val fusionarConKrillin = Fusion(krillin)(_,_)
+
+    val goku = Guerrero(100, Ki(80), List(CargarKi, CargarMenosKi, UsarSemilla, usarArma), Nil, Consciente, Humano)
+    val vegeta = Guerrero(100, Ki(20), Nil, Nil, Consciente, Humano)
+
+    val mejorMov = goku.movimentoMasEfectivoContra(vegeta, DejarMasKi)
+
+    assert(mejorMov == UsarSemilla)
+  }
+
 }
 
-/*
+ /*
 goku.masefectivocontra(vegeta) {
   (goku.movimientos, goku, vegeta) = for {
     movimiento <- goku.movimientos
