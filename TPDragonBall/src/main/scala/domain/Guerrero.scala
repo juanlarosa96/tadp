@@ -16,7 +16,11 @@ case class Guerrero(energiaMaxima: Int,
                     raza: Raza) {
 
   def ejecutar(mov: Movimiento, enemigo: Guerrero): Guerrero = {
-    mov(this, enemigo)._1
+    estado match{
+      case Conciente => mov(this, enemigo)
+      case _ => if(mov == UsarSemilla) mov(this, enemigo) else (this,enemigo)
+    }
+
   }
 
   def dejarseFajar: Guerrero = this
@@ -81,8 +85,16 @@ case class Guerrero(energiaMaxima: Int,
     resultados.sortBy(_._2).map(_._1).reverse.head
   }
 
-  def pelearRound(mov: Movimiento, enemigo: Guerrero): (Guerrero, Guerrero) = {
-    mov(this, enemigo)
+  def pelearRound(mov: Movimiento, enemigo: Guerrero): (Guerrero, Guerrero, Option[Guerrero]) = {
+    ejecutar(mov, enemigo)
+    ejecutar(enemigo.movimentoMasEfectivoContra(this,DejarMasKi),this)
+    if(enemigo.estado == Muerto){
+      (this,enemigo,Some(this))
+    } else if(this.estado == Muerto){
+      (this,enemigo,Some(this))
+    } else {
+      (this,enemigo,None)
+    }
   }
 }
 
