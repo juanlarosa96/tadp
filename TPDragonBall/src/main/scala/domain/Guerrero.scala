@@ -101,6 +101,13 @@ case class Guerrero(energiaMaxima: Int,
       (this,enemigo,None)
     }
   }
+  def recibirGolpeKi(cantidad: Int): Guerrero ={
+    this.raza match
+      case Monstruo => this.cambiarEnergia((-2) *cantidad)
+      case Androide => this.cambiarEnergia(cantidad)
+      case _ => this.cambiarEnergia(-cantidad)
+  }
+
 }
 
 
