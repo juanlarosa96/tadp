@@ -121,20 +121,21 @@ object TiposMovimientos {
     (guerreroFusionado, enemigo)
   }
 
-  def GolpesNinja(guerrero: Guerrero, enemigo: Guerrero): (Guerrero, Guerrero) = {
-    guerrero.raza match {
-      case Humano if (enemigo.raza == Androide) => (guerrero.cambiarEnergia(-10), enemigo)
-      case _ => if (enemigo.energia.cant > guerrero.energia.cant) (guerrero.cambiarEnergia(-20), enemigo) else (guerrero, enemigo.cambiarEnergia(-10))
-    }
+  val GolpesNinja: (Guerrero, Guerrero) => (Guerrero, Guerrero) = {
+    (guerrero: Guerrero, enemigo: Guerrero) =>
+      guerrero.raza match {
+        case Humano if (enemigo.raza == Androide) => (guerrero.cambiarEnergia(-10), enemigo)
+        case _ => if (enemigo.energia.cant > guerrero.energia.cant) (guerrero.cambiarEnergia(-20), enemigo) else (guerrero, enemigo.cambiarEnergia(-10))
+      }
   }
 
-    def Explotar(guerrero: Guerrero, enemigo: Guerrero): (Guerrero, Guerrero) = {
-      guerrero.raza match {
-        case Androide => (guerrero.cambiarEnergia(-guerrero.energiaMaxima), enemigo.cambiarEnergia(guerrero.energia.cant*(-3)))
-        case Namekusein => (guerrero.cambiarEnergia(1-guerrero.energia.cant), enemigo.cambiarEnergia(guerrero.energia.cant*(-2)))
-        case Humano => (guerrero, enemigo)
-      }
-
+  val Explotar(Guerrero, Guerrero) => (Guerrero, Guerrero) = {
+    (guerrero: Guerrero, enemigo: Guerrero) =>
+    guerrero.raza match {
+      case Androide => (guerrero.cambiarEnergia(-guerrero.energiaMaxima), enemigo.cambiarEnergia(guerrero.energia.cant * (-3)))
+      case Namekusein => (guerrero.cambiarEnergia(1 - guerrero.energia.cant), enemigo.cambiarEnergia(guerrero.energia.cant * (-2)))
+      case Humano => (guerrero, enemigo)
     }
   }
 }
+
