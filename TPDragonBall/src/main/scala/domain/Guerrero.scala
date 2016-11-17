@@ -27,6 +27,14 @@ case class Guerrero(energiaMaxima: Int,
   def dejarseFajar: Guerrero = this
 
   def alterarEstado(estadoNuevo: Estado): Guerrero = {
+    estadoNuevo match{
+      case Consciente => this.copy(estado = estadoNuevo)
+      case _ => raza match {
+        case Saiyajin => this.copy(raza.transformacion = Normal, roundsDejadoFajar = 0)
+        case _ => this.copy(roundsDejadoFajar = 0)
+      }
+    }}
+
     this.copy(estado = estadoNuevo)
   }
 
