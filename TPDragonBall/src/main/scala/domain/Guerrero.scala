@@ -64,7 +64,11 @@ case class Guerrero(energiaMaxima: Int,
 
   //Creo metodo porque se esta repitiendo todo el tiempo lo mismo
   def cambiarEnergia(valor: Int): Guerrero = {
-    this.copy(energia = Ki(energia.cant + valor))
+    valor match {
+      case this.energia.cant + valor > this.energiaMaxima) => this.copy(energia = Ki(this.energiaMaxima)
+      case this.energia.cant + valor < 0 => this.copy(energia = Ki(0), estado = Muerto)
+      case _ => this.copy(energia = Ki(energia.cant + valor))
+    }
   }
 
   def movimentoMasEfectivoContra(enemigo: Guerrero, unCriterio: Criterio): Movimiento = {
