@@ -64,7 +64,7 @@ object TiposMovimientos {
 
   val UsarSemilla: Movimiento = UsarItem(Semilla)(_, _)
 
-  def UsarItem(item: Item)(guerrero: Guerrero, enemigo: Guerrero):  (Guerrero, Guerrero) = {
+  def UsarItem(item: Item)(guerrero: Guerrero, enemigo: Guerrero): (Guerrero, Guerrero) = {
     if (guerrero.puedeUsarItem(item)) {
       item match {
         case arma: Arma =>
@@ -95,7 +95,9 @@ object TiposMovimientos {
           (guerrero.copy(energia = Ki(1000)), enemigo) //TODO sacar semillas
         //TODO Pendiente las demas armas
       }
-    } else {(guerrero, enemigo)}
+    } else {
+      (guerrero, enemigo)
+    }
   }
 
   val TransformarseEnMono: (Guerrero, Guerrero) => (Guerrero, Guerrero) = {
@@ -117,5 +119,22 @@ object TiposMovimientos {
         estado = Consciente,
         raza = null)
     (guerreroFusionado, enemigo)
+  }
+
+  def GolpesNinja(guerrero: Guerrero, enemigo: Guerrero): (Guerrero, Guerrero) = {
+    guerrero.raza match {
+      case Humano if (enemigo.raza == Androide) => (guerrero.cambiarEnergia(-10), enemigo)
+      case _ => if (enemigo.energia.cant > guerrero.energia.cant) (guerrero.cambiarEnergia(-20), enemigo) else (guerrero, enemigo.cambiarEnergia(-10))
+    }
+  }
+
+    def Explotar(guerrero: Guerrero, enemigo: Guerrero): (Guerrero, Guerrero) = {
+      guerrero.raza match {
+        case Androide => (guerrero.cambiarEnergia(-guerrero.energiaMaxima), enemigo.cambiarEnergia(guerrero.energia.cant*(-3)))
+        case Namekusein => (guerrero.cambiarEnergia(1-guerrero.energia.cant), enemigo.cambiarEnergia(guerrero.energia.cant*(-2)))
+        case Humano => (guerrero, enemigo)
+      }
+
+    }
   }
 }
