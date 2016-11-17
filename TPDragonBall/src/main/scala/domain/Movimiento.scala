@@ -65,6 +65,7 @@ object TiposMovimientos {
   val UsarSemilla: Movimiento = UsarItem(Semilla)(_, _)
 
   def UsarItem(item: Item)(guerrero: Guerrero, enemigo: Guerrero):  (Guerrero, Guerrero) = {
+    if (guerrero.puedeUsarItem(item)) {
       item match {
         case arma: Arma =>
           arma.tipo match {
@@ -94,6 +95,7 @@ object TiposMovimientos {
           (guerrero.copy(energia = Ki(1000)), enemigo) //TODO sacar semillas
         //TODO Pendiente las demas armas
       }
+    } else {(guerrero, enemigo)}
   }
 
   val TransformarseEnMono: (Guerrero, Guerrero) => (Guerrero, Guerrero) = {

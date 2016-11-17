@@ -39,6 +39,13 @@ case class Guerrero(energiaMaxima: Int,
      inventario.exists {
        case mun: Municion => mun.cantidad >= 1
      }
+
+    def puedeUsarItem(item: Item) : Boolean = {
+     item match {
+       case arma :Arma if arma.tipo = DeFuego => (this.inventario.exists(item) and this.tieneMunicion)
+       case _ => this.inventario.exists(item)
+     }
+    }
    }
 
    //LEO: Idea: Podria hacerse generico a cualquier tipo de Item, tipo semilla hermitaneo. Hay que ver como pasar como parametro un tipo de clase
