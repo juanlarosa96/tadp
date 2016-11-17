@@ -13,6 +13,7 @@ case class Guerrero(energiaMaxima: Int,
                     movimientos: List[Movimiento],
                     inventario: List[Item],
                     estado: Estado,
+                    roundsDejadoFajar: Int,
                     raza: Raza) {
 
   def ejecutar(mov: Movimiento, enemigo: Guerrero): Guerrero = {
@@ -46,7 +47,7 @@ case class Guerrero(energiaMaxima: Int,
 
     def puedeUsarItem(item: Item) : Boolean = {
      item match {
-       case arma :Arma if arma.tipo = DeFuego => (this.inventario.exists(item) and this.tieneMunicion)
+       case arma :Arma if(arma.tipo == DeFuego) => (this.inventario.exists(item) and this.tieneMunicion)
        case _ => this.inventario.exists(item)
      }
     }
