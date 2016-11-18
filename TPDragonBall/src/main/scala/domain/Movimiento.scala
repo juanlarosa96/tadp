@@ -83,10 +83,12 @@ object TiposMovimientos {
             case Filosa =>
               enemigo.raza match {
                 case saiyajin: Saiyajin if saiyajin.cola =>
-                  (guerrero, enemigo.copy(energia = Ki(1), raza = Saiyajin(cola = false, transformacion = Normal)))
+                  (guerrero, enemigo.alterarEstado(Inconsciente).copy(raza = saiyajin.cortarCola, energia = Ki(1)))
+                      //enemigo.copy(energia = Ki(1), raza = Saiyajin(cola = false, transformacion = Normal)))
                 case otro =>
-                  (guerrero, enemigo.cambiarEnergia(guerrero.energia.cant / 100))
+                  (guerrero, enemigo.cambiarEnergia(-(guerrero.energia.cant / 100)))
               }
+            case otro =>(guerrero,enemigo)
           }
         case Semilla =>
           (guerrero.copy(energia = Ki(1000)), enemigo) //TODO sacar semillas
@@ -97,15 +99,17 @@ object TiposMovimientos {
     }
   }
 
-  val TransformarseEnMono: (Guerrero, Guerrero) => (Guerrero, Guerrero) = {
-    (guerrero: Guerrero, None) =>
+  val TransformarseEnMono: Movimiento = {
+    (guerrero: Guerrero, enemigo : Guerrero) =>
       guerrero.raza match {
         case Saiyajin(cola, transf) if guerrero.inventario.contains(FotoLuna) && cola && transf != Mono =>
-          (guerrero.copy(raza = Saiyajin(cola = true, Mono)), None)
+          (guerrero.copy(energiaMaxima = guerrero.energiaMaxima*3, energia = Ki(guerrero.energiaMaxima*3),raza = Saiyajin(cola = true, Mono)), enemigo)
         case _ =>
-          (guerrero, None)
+          (guerrero, enemigo)
       }
   }
+  
+  //val TransformarEnSuperSaiyajin
 
   def Fusion(compañero: Guerrero)(guerrero: Guerrero, enemigo: Guerrero): (Guerrero, Guerrero) = {
     val guerreroFusionado =
