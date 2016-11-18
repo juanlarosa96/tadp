@@ -1,12 +1,10 @@
 package domain
 
-
 import domain.TiposMovimientos._
 import enums.TipoMonstruo
 import enums.TipoMonstruo._
 
 import scala.util.Try
-
 
 case class Guerrero(energiaMaxima: Int,
                     energia: FuenteDeEnergia,
@@ -18,9 +16,9 @@ case class Guerrero(energiaMaxima: Int,
 
   def ejecutar(mov: Movimiento, enemigo: Guerrero): (Guerrero, Guerrero) = { //GAS: Lo cambio a guerrero, guerrero
     estado match {
-      case Consciente => mov(this, enemigo)
+      case Consciente                         => mov(this, enemigo)
       case Inconsciente if mov == UsarSemilla => mov(this, enemigo)
-      case _ => (this, enemigo) //MUERTO NO PUEDE USAR SEMILLA
+      case _                                  => (this, enemigo) //MUERTO NO PUEDE USAR SEMILLA
     }
   }
 
@@ -32,23 +30,20 @@ case class Guerrero(energiaMaxima: Int,
       case _ =>
         raza match {
           case Saiyajin(cola, _) => this.copy(raza = Saiyajin(cola, Normal), roundsDejadoFajar = 0) //cambio algo aca. QUE ES ESTO?
-          case _ => this.copy(roundsDejadoFajar = 0)
+          case _                 => this.copy(roundsDejadoFajar = 0)
         }
     }
 
     this.copy(estado = estadoNuevo)
   }
 
- 
-  
-   def tieneItem(esTipoItem: Item => Boolean) :Boolean = {
+  def tieneItem(esTipoItem: Item => Boolean): Boolean = {
     inventario.filter { item => esTipoItem(item) }.size > 0
-   }
-   //Creo abstracciones para leer mas sencillo
- 
-      
-   def queSeaMunicion = {i:Item => i.getClass == Municion}
-   
+  }
+  //Creo abstracciones para leer mas sencillo
+
+  def queSeaMunicion = { i: Item => i.getClass == Municion }
+
   def tieneMunicion = this.tieneItem { queSeaMunicion };
   //TODO Podria rescribirse usando tieneItem
   def tiene7Esferas(): Boolean = {
@@ -56,44 +51,40 @@ case class Guerrero(energiaMaxima: Int,
       case esfera: Esfera => esfera.cantidad == 7
     }
   }
-   
-   
-  def puedeUsarItem(item: Item) : Boolean = {
+
+  def puedeUsarItem(item: Item): Boolean = {
     item match {
       case arma: Arma if arma.tipo == DeFuego => this.inventario.contains(item) && this.tieneMunicion
-      case _ => this.inventario.contains(item)
+      case _                                  => this.inventario.contains(item)
     }
   }
 
-  def consumirItem(esTipoItem: Item => Boolean) :Guerrero = {
-    val itemPorConsumir = inventario.find { item =>  esTipoItem(item) }
-    val nuevoInventario :List[Item]= inventario.filterNot { i => i == itemPorConsumir }
- 
+  def consumirItem(esTipoItem: Item => Boolean): Guerrero = {
+    val itemPorConsumir = inventario.find { item => esTipoItem(item) }
+    val nuevoInventario: List[Item] = inventario.filterNot { i => i == itemPorConsumir }
+
     this.copy(inventario = nuevoInventario)
   }
   def consumirMunicion = this.consumirItem { queSeaMunicion }
-  
+
   //Usa Todas las esferas que tiene
   def usarEsferas: Guerrero = {
     this.copy(inventario = inventario.filter(_.getClass != Esfera))
   }
 
-
   //Creo metodo porque se esta repitiendo todo el tiempo lo mismo
   def cambiarEnergia(valor: Int): Guerrero = {
     if (sePasaDeEnergia(valor))
       this.copy(energia = Ki(this.energiaMaxima))
-    else
-    if (energiaMenorOIgualACero(valor))
+    else if (energiaMenorOIgualACero(valor))
       this.copy(energia = Ki(0), estado = Muerto)
     else
       this.copy(energia = Ki(energia.cant + valor))
-    }
+  }
 
   def sePasaDeEnergia(valor: Int): Boolean = energia.cant + valor > energiaMaxima
 
   def energiaMenorOIgualACero(valor: Int): Boolean = energia.cant + valor <= 0
-
 
   def movimientoMasEfectivoContra(enemigo: Guerrero, unCriterio: Criterio): Movimiento = {
     val resultados: List[(Movimiento, Int)] = for {
@@ -118,24 +109,22 @@ case class Guerrero(energiaMaxima: Int,
     val (enemigoFinal, guerreroFinal) = enemigoResultado.ejecutar(enemigoResultado.movimientoMasEfectivoContra(guerreroResultado, DejarMasKi), guerreroResultado)
     if (enemigoFinal.estado == Muerto) {
       (guerreroFinal, enemigoFinal, Some(guerreroFinal))
-    } else if(guerreroFinal.estado == Muerto){
+    } else if (guerreroFinal.estado == Muerto) {
       (guerreroFinal, enemigoFinal, Some(enemigoFinal))
     } else {
       (guerreroFinal, enemigoFinal, None)
     }
   }
 
-  def recibirGolpeKi(cantidad: Int): Guerrero ={
+  def recibirGolpeKi(cantidad: Int): Guerrero = {
     raza match {
       case monstruo: Monstruo => this.cambiarEnergia((-2) * cantidad) //GAS: Le agrego para que matchee
-      case Androide => this.cambiarEnergia(cantidad)
-      case _ => this.cambiarEnergia(-cantidad)
+      case Androide           => this.cambiarEnergia(cantidad)
+      case _                  => this.cambiarEnergia(-cantidad)
     }
   }
 
 }
-
-
 
 // ------------------------------ TIPOS DE GUERRERO ------------------------------
 
@@ -148,14 +137,19 @@ case object Namekusein extends Raza
 case class Saiyajin(cola: Boolean,
                     transformacion: Transformacion) extends Raza {
 
-  def cortarCola = this.copy(cola = false)
+  def cortarCola = {
+    transformacion match {
+      case Mono => this.copy(transformacion = Normal, cola = false)
+      case _    => this.copy(cola = false)
+    }
+  }
   def transformarEnMono = this.copy(transformacion = Mono)
   def transformarEnSuperSaiyajin(nivel: Int) = this.copy(transformacion = SuperSaiyajin(nivel))
 
 }
 
 case class Monstruo(tipoMonstruo: TipoMonstruo) extends Raza {
-/*
+  /*
   def comerseAlOponente(guerreroAComer: Guerrero) = { //TODO esta aca pq solo este movimiento lo hacen los mounstruos, por ahora no tiene sentido modelarlo afuera
     tipoMonstruo match {
       case TipoMonstruo.CELL =>
@@ -168,7 +162,6 @@ case class Monstruo(tipoMonstruo: TipoMonstruo) extends Raza {
   }
 */
 }
-
 
 // ------------------------- ESTADOS DE VIDA --------------------------
 
@@ -188,8 +181,8 @@ case object Normal extends Transformacion
 
 // ------------------------- FUENTES DE ENERGIA --------------------------
 
-abstract class  FuenteDeEnergia {
-  def cant :Int
+abstract class FuenteDeEnergia {
+  def cant: Int
 }
 
 case class Ki(cant: Int) extends FuenteDeEnergia
