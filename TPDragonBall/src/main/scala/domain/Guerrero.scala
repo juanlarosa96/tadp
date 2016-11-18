@@ -116,6 +116,27 @@ case class Guerrero(energiaMaxima: Int,
       (guerreroFinal, enemigoFinal, None)
     }
   }
+  
+  def planDeAtaqueContra(enemigo: Guerrero, cantidadDeRounds: Int)(unCriterio: Criterio) :PlanDeAtaque = {
+    var movimientosElegidos:List[Movimiento] = List();
+    var guerreros:(Guerrero, Guerrero, Option[Guerrero]) = (this, enemigo, None)      //Para facilitar trabajar con pelearRound en el Ciclo, guardo en esta variable los resultados paso a paso
+    //Defino funciones para abstraer nombre a lo de arriba
+    def miGuerrero  =   guerreros._1
+    def elEnemigo   =   guerreros._2
+    
+    
+    for( roundActual <- 1 to cantidadDeRounds ){
+      //Elijo Movimiento mas efectivo
+       var mov = miGuerrero.movimientoMasEfectivoContra(elEnemigo, unCriterio)
+       //Simulo la Pelea y guardo los resultados
+       guerreros = miGuerrero.pelearRound(mov)(elEnemigo)
+       
+       //Podria hacerse alguna validacion antes de agregar el movimiento, si fuera necesario..
+       movimientosElegidos = movimientosElegidos union List(mov)
+    }
+    
+    return PlanDeAtaque(movimientosElegidos, cantidadDeRounds, unCriterio);
+  }
 
   def recibirGolpeKi(cantidad: Int): Guerrero = {
     raza match {
