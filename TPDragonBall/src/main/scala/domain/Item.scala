@@ -11,9 +11,7 @@ case class Esfera(cantidad: Int) extends Item {
   def consumir = this.copy(cantidad - 1)
 }
 
-case class Municion(cantidad: Int) extends Item {
-  def consumir = this.copy(cantidad - 1)
-}
+case object Municion extends Item
 
 case class Arma(tipo: TipoArma) extends Item
 

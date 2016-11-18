@@ -70,7 +70,6 @@ object TiposMovimientos {
         case arma: Arma =>
           arma.tipo match {
             case DeFuego =>
-              if (guerrero.tieneMunicion) {
                 enemigo.raza match {
                   case Humano =>
                     (guerrero.consumirMunicion, enemigo.cambiarEnergia(-20))
@@ -78,9 +77,7 @@ object TiposMovimientos {
                     (guerrero.consumirMunicion, enemigo.cambiarEnergia(-10))
                   case otro =>
                     (guerrero.consumirMunicion, enemigo)
-                }
               }
-              else (guerrero, enemigo)
             case Roma if Roma.puedeBajar(enemigo) =>
               (guerrero, enemigo.copy(estado = Inconsciente))
             case Filosa =>
