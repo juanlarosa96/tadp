@@ -39,21 +39,25 @@ case class Guerrero(energiaMaxima: Int,
     this.copy(estado = estadoNuevo)
   }
 
+ 
+  
+   def tieneItem(esTipoItem: Item => Boolean) :Boolean = {
+    inventario.filter { item => esTipoItem(item) }.size > 0
+   }
+   //Creo abstracciones para leer mas sencillo
+ 
+      
+   def queSeaMunicion = {i:Item => i.getClass == Municion}
+   
+  def tieneMunicion = this.tieneItem { queSeaMunicion };
+  //TODO Podria rescribirse usando tieneItem
   def tiene7Esferas(): Boolean = {
     inventario.exists {
       case esfera: Esfera => esfera.cantidad == 7
     }
   }
-
-  def usarEsferas: Guerrero = {
-    this.copy(inventario = inventario.filter(_.getClass != Esfera))
-  }
-
-   def tieneMunicion: Boolean = {
-     inventario.exists {
-       case mun: Municion => mun.cantidad >= 1
-     }
-   }
+   
+   
   def puedeUsarItem(item: Item) : Boolean = {
     item match {
       case arma: Arma if arma.tipo == DeFuego => this.inventario.contains(item) && this.tieneMunicion
@@ -61,13 +65,19 @@ case class Guerrero(energiaMaxima: Int,
     }
   }
 
-  def consumirMunicion: Guerrero = {
-    val nuevoInventario = this.inventario.map {
-      case mun: Municion => mun.consumir;
-      case otro => otro;  //No modifica los demas
-    }
+  def consumirItem(esTipoItem: Item => Boolean) :Guerrero = {
+    val itemPorConsumir = inventario.find { item =>  esTipoItem(item) }
+    val nuevoInventario :List[Item]= inventario.filterNot { i => i == itemPorConsumir }
+ 
     this.copy(inventario = nuevoInventario)
   }
+  def consumirMunicion = this.consumirItem { queSeaMunicion }
+  
+  //Usa Todas las esferas que tiene
+  def usarEsferas: Guerrero = {
+    this.copy(inventario = inventario.filter(_.getClass != Esfera))
+  }
+
 
   //Creo metodo porque se esta repitiendo todo el tiempo lo mismo
   def cambiarEnergia(valor: Int): Guerrero = {
