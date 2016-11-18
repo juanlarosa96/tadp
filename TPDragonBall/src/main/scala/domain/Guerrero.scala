@@ -144,7 +144,11 @@ case class Saiyajin(cola: Boolean,
     }
   }
   def transformarEnMono = this.copy(transformacion = Mono)
-  def transformarEnSuperSaiyajin(nivel: Int) = this.copy(transformacion = SuperSaiyajin(nivel))
+  def transformarEnSuperSaiyajin = transformacion match {
+    case saiyajin: SuperSaiyajin => this.copy(transformacion = SuperSaiyajin(saiyajin.nivel+1))
+    case Normal => this.copy(transformacion = SuperSaiyajin(1))
+    case Mono => this
+  }
 
 }
 
