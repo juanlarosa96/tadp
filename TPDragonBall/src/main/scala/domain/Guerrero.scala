@@ -45,6 +45,7 @@ case class Guerrero(energiaMaxima: Int,
   def queSeaMunicion = { i: Item => i.getClass == Municion }
 
   def tieneMunicion = this.tieneItem { queSeaMunicion };
+  
   //TODO Podria rescribirse usando tieneItem
   def tiene7Esferas(): Boolean = {
     inventario.exists {
