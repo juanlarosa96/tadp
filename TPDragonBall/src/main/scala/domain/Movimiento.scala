@@ -109,7 +109,13 @@ object TiposMovimientos {
       }
   }
   
-  //val TransformarEnSuperSaiyajin
+  val TransformarEnSuperSaiyajin: Movimiento = {
+    (guerrero: Guerrero, enemigo: Guerrero) =>
+      guerrero.raza match{
+        case saiyajin: Saiyajin if guerrero.energia.cant >= (guerrero.energiaMaxima/2)=> (guerrero.copy(energiaMaxima = guerrero.energiaMaxima*5, raza = saiyajin.transformarEnSuperSaiyajin),enemigo)
+        case _ => (guerrero, enemigo)
+      }
+  }
 
   def Fusion(compañero: Guerrero)(guerrero: Guerrero, enemigo: Guerrero): (Guerrero, Guerrero) = {
     val guerreroFusionado =
