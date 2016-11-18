@@ -1,7 +1,7 @@
 package domain
 
 trait Criterio {
-  def apply(guerreroFInal: Guerrero): Int
+  def apply(guerreroFinal: Guerrero): Int
 }
 
 case object RealizarMasDanio extends Criterio {

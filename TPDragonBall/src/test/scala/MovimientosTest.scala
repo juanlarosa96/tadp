@@ -5,7 +5,7 @@ import org.scalatest._
 class MovimientosTest extends FlatSpec with Matchers {
 
   it should "Persona carga su Ki" in {
-    val pedro = Guerrero(100,Ki(80), List(CargarKi), Nil, Consciente, Humano)
+    val pedro = Guerrero(100,Ki(80), List(CargarKi), Nil, Consciente, _, Humano)
     println("pedro antes de cargar energia")
     println(pedro)
     println("pedro despues de cargar energia")
@@ -23,8 +23,8 @@ class MovimientosTest extends FlatSpec with Matchers {
 
     //val fusionarConKrillin = Fusion(krillin)(_,_)
 
-    val goku = Guerrero(100, Ki(80), List(CargarKi, CargarMenosKi, UsarSemilla, usarArma), Nil, Consciente, Humano)
-    val vegeta = Guerrero(100, Ki(20), Nil, Nil, Consciente, Humano)
+    val goku = Guerrero(100, Ki(80), List(CargarKi, CargarMenosKi, UsarSemilla, usarArma), Nil, Consciente, _, Humano)
+    val vegeta = Guerrero(100, Ki(20), Nil, Nil, Consciente, _, Humano)
 
     val mejorMov = goku.movimentoMasEfectivoContra(vegeta, DejarMasKi)
 

@@ -1,7 +1,7 @@
 package domain
 
 
-import domain.TiposMovimientos.Movimiento
+import domain.TiposMovimientos._
 import enums.TipoMonstruo
 import enums.TipoMonstruo._
 
@@ -16,24 +16,25 @@ case class Guerrero(energiaMaxima: Int,
                     roundsDejadoFajar: Int,
                     raza: Raza) {
 
-  def ejecutar(mov: Movimiento, enemigo: Guerrero): Guerrero = {
-    estado match{
-      case Conciente => mov(this, enemigo)
-      case _ => if(mov == UsarSemilla) mov(this, enemigo) else (this,enemigo)
+  def ejecutar(mov: Movimiento, enemigo: Guerrero): (Guerrero, Guerrero) = { //GAS: Lo cambio a guerrero, guerrero
+    estado match {
+      case Consciente => mov(this, enemigo)
+      case Inconsciente if mov == UsarSemilla => mov(this, enemigo)
+      case _ => (this, enemigo) //MUERTO NO PUEDE USAR SEMILLA
     }
-
   }
 
   def dejarseFajar: Guerrero = this
 
   def alterarEstado(estadoNuevo: Estado): Guerrero = {
-    estadoNuevo match{
+    estadoNuevo match {
       case Consciente => this.copy(estado = estadoNuevo)
-      case _ => raza match {
-        case Saiyajin => this.copy(raza.transformacion = Normal, roundsDejadoFajar = 0)
-        case _ => this.copy(roundsDejadoFajar = 0)
-      }
-    }}
+      case _ =>
+        raza match {
+          case Saiyajin(cola, _) => this.copy(raza = Saiyajin(cola, Normal), roundsDejadoFajar = 0) //cambio algo aca. QUE ES ESTO?
+          case _ => this.copy(roundsDejadoFajar = 0)
+        }
+    }
 
     this.copy(estado = estadoNuevo)
   }
@@ -52,33 +53,37 @@ case class Guerrero(energiaMaxima: Int,
      inventario.exists {
        case mun: Municion => mun.cantidad >= 1
      }
-
-    def puedeUsarItem(item: Item) : Boolean = {
-     item match {
-       case arma :Arma if(arma.tipo == DeFuego) => (this.inventario.exists(item) and this.tieneMunicion)
-       case _ => this.inventario.exists(item)
-     }
+   }
+  def puedeUsarItem(item: Item) : Boolean = {
+    item match {
+      case arma: Arma if arma.tipo == DeFuego => this.inventario.contains(item) && this.tieneMunicion
+      case _ => this.inventario.contains(item)
     }
-   }
+  }
 
-   //LEO: Idea: Podria hacerse generico a cualquier tipo de Item, tipo semilla hermitaneo. Hay que ver como pasar como parametro un tipo de clase
-   def consumirMunicion: Guerrero = {
-     val nuevoInventario = this.inventario.map {
-       case mun: Municion => mun.consumir;
-       case otro => otro;  //No modifica los demas
-     }
-    //LEO: Falta hacer el arreglo del Copy. No me acuerdo que habian dicho en clase...
+  def consumirMunicion: Guerrero = {
+    val nuevoInventario = this.inventario.map {
+      case mun: Municion => mun.consumir;
+      case otro => otro;  //No modifica los demas
+    }
     this.copy(inventario = nuevoInventario)
-   }
+  }
 
   //Creo metodo porque se esta repitiendo todo el tiempo lo mismo
   def cambiarEnergia(valor: Int): Guerrero = {
-    valor match {
-      case this.energia.cant + valor > this.energiaMaxima) => this.copy(energia = Ki(this.energiaMaxima)
-      case this.energia.cant + valor < 0 => this.copy(energia = Ki(0), estado = Muerto)
-      case _ => this.copy(energia = Ki(energia.cant + valor))
+    if (sePasaDeEnergia(valor))
+      this.copy(energia = Ki(this.energiaMaxima))
+    else
+    if (energiaNoLlegaACero(valor))
+      this.copy(energia = Ki(0), estado = Muerto)
+    else
+      this.copy(energia = Ki(energia.cant + valor))
     }
-  }
+
+  def sePasaDeEnergia(valor: Int): Boolean = energia.cant + valor > energiaMaxima
+
+  def energiaNoLlegaACero(valor: Int): Boolean = energia.cant + valor < 0
+
 
   def movimentoMasEfectivoContra(enemigo: Guerrero, unCriterio: Criterio): Movimiento = {
     val resultados: List[(Movimiento, Int)] = for {
@@ -90,7 +95,7 @@ case class Guerrero(energiaMaxima: Int,
       guerreroPostMov = this.ejecutar(mov, enemigo)
 
       //valoro movimiento segun criterio
-      valor = unCriterio(guerreroPostMov)
+      valor = unCriterio(guerreroPostMov._1)
 
     } yield (mov, valor)
 
@@ -110,10 +115,11 @@ case class Guerrero(energiaMaxima: Int,
     }
   }
   def recibirGolpeKi(cantidad: Int): Guerrero ={
-    this.raza match
-      case Monstruo => this.cambiarEnergia((-2) *cantidad)
+    raza match {
+      case monstruo: Monstruo => this.cambiarEnergia((-2) * cantidad) //GAS: Le agrego para que matchee
       case Androide => this.cambiarEnergia(cantidad)
       case _ => this.cambiarEnergia(-cantidad)
+    }
   }
 
 }

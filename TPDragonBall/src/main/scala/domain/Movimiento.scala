@@ -117,6 +117,7 @@ object TiposMovimientos {
         movimientos = guerrero.movimientos ::: compañero.movimientos,
         inventario = guerrero.inventario ::: compañero.inventario,
         estado = Consciente,
+        roundsDejadoFajar = 0,
         raza = null)
     (guerreroFusionado, enemigo)
   }
@@ -124,31 +125,35 @@ object TiposMovimientos {
   val GolpesNinja: (Guerrero, Guerrero) => (Guerrero, Guerrero) = {
     (guerrero: Guerrero, enemigo: Guerrero) =>
       guerrero.raza match {
-        case Humano if (enemigo.raza == Androide) => (guerrero.cambiarEnergia(-10), enemigo)
+        case Humano if enemigo.raza == Androide => (guerrero.cambiarEnergia(-10), enemigo)
         case _ => if (enemigo.energia.cant > guerrero.energia.cant) (guerrero.cambiarEnergia(-20), enemigo) else (guerrero, enemigo.cambiarEnergia(-10))
       }
   }
 
-  val Explotar(Guerrero, Guerrero) => (Guerrero, Guerrero) = {
+  val Explotar: (Guerrero, Guerrero) => (Guerrero, Guerrero) = {
     (guerrero: Guerrero, enemigo: Guerrero) =>
-    guerrero.raza match {
-      case Androide => (guerrero.cambiarEnergia(-guerrero.energiaMaxima), enemigo.cambiarEnergia(guerrero.energia.cant * (-3)))
-      case Namekusein => (guerrero.cambiarEnergia(1 - guerrero.energia.cant), enemigo.cambiarEnergia(guerrero.energia.cant * (-2)))
-      case _ => (guerrero, enemigo)
-    }
+      guerrero.raza match {
+        case Androide => (guerrero.cambiarEnergia(-guerrero.energiaMaxima), enemigo.cambiarEnergia(guerrero.energia.cant * (-3)))
+        case Namekusein => (guerrero.cambiarEnergia(1 - guerrero.energia.cant), enemigo.cambiarEnergia(guerrero.energia.cant * (-2)))
+        case _ => (guerrero, enemigo)
+      }
   }
 
-  def Onda(onda:Onda)(guerrero: Guerrero, enemigo: Guerrero): (Guerrero, Guerrero) = {
-    onda match
-      case Genkidama => if(guerrero.roundsDejadoFajar > 1) (guerrero, enemigo.redibirGolpeKi(math.pow(10,guerrero.roundsDejadoFajar)))
-      case _ = if(guerrero.energia.cant >= onda.cantidadKi) (guerrero, enemigo.redibirGolpeKi(onda.cantidadKi)) else (guerrero,enemigo)
+  def Onda(onda: Onda)(guerrero: Guerrero, enemigo: Guerrero): (Guerrero, Guerrero) = {
+    onda match {
+      case Genkidama if guerrero.roundsDejadoFajar > 1 => (guerrero, enemigo.recibirGolpeKi(math.pow(10, guerrero.roundsDejadoFajar).toInt))
+      case ondaChica: OndaChica if guerrero.energia.cant >= ondaChica.cantidadKiRequerida => (guerrero, enemigo.recibirGolpeKi(ondaChica.cantidadKiRequerida))
+      case _ => (guerrero, enemigo)
+    }
   }
 }
 
 abstract class Onda
+case object Genkidama extends Onda
 
-case object Kamehameha { def cantidadKi = 100} extends FuenteDeEnergia
-case object Genkidama extends FuenteDeEnergia
+abstract class OndaChica extends Onda { val cantidadKiRequerida: Int }
+case object Kamehameha extends OndaChica { val cantidadKiRequerida = 100 }
+case object Dodonpa extends OndaChica { val cantidadKiRequerida = 20}
 
 
 
