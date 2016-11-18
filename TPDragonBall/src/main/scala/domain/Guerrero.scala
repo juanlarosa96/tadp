@@ -60,12 +60,17 @@ case class Guerrero(energiaMaxima: Int,
     }
   }
 
+  //Permite consumir cualquier tipo de item, solamente requiere de entrada una funcion que diga cual item queremos consumir.
   def consumirItem(esTipoItem: Item => Boolean): Guerrero = {
+    //Busco el Item a Consumir (trae solo el primero que cumpla)
     val itemPorConsumir = inventario.find { item => esTipoItem(item) }
+    //Generamos un nuevo inventario sin el elemento anterior
     val nuevoInventario: List[Item] = inventario.filterNot { i => i == itemPorConsumir }
 
+    //Devuelvo el guerrero con el nuevo inventario
     this.copy(inventario = nuevoInventario)
   }
+  
   def consumirMunicion = this.consumirItem { queSeaMunicion }
 
   //Usa Todas las esferas que tiene
