@@ -74,7 +74,7 @@ case class Guerrero(energiaMaxima: Int,
     if (sePasaDeEnergia(valor))
       this.copy(energia = Ki(this.energiaMaxima))
     else
-    if (energiaNoLlegaACero(valor))
+    if (energiaMenorOIgualACero(valor))
       this.copy(energia = Ki(0), estado = Muerto)
     else
       this.copy(energia = Ki(energia.cant + valor))
@@ -82,10 +82,10 @@ case class Guerrero(energiaMaxima: Int,
 
   def sePasaDeEnergia(valor: Int): Boolean = energia.cant + valor > energiaMaxima
 
-  def energiaNoLlegaACero(valor: Int): Boolean = energia.cant + valor < 0
+  def energiaMenorOIgualACero(valor: Int): Boolean = energia.cant + valor <= 0
 
 
-  def movimentoMasEfectivoContra(enemigo: Guerrero, unCriterio: Criterio): Movimiento = {
+  def movimientoMasEfectivoContra(enemigo: Guerrero, unCriterio: Criterio): Movimiento = {
     val resultados: List[(Movimiento, Int)] = for {
 
       //Por cada movimiento del guerrero
@@ -103,17 +103,18 @@ case class Guerrero(energiaMaxima: Int,
     resultados.sortBy(_._2).map(_._1).reverse.head
   }
 
-  def pelearRound(mov: Movimiento, enemigo: Guerrero): (Guerrero, Guerrero, Option[Guerrero]) = {
-    ejecutar(mov, enemigo)
-    ejecutar(enemigo.movimentoMasEfectivoContra(this,DejarMasKi),this)
-    if(enemigo.estado == Muerto){
-      (this,enemigo,Some(this))
-    } else if(this.estado == Muerto){
-      (this,enemigo,Some(this))
+  def pelearRound(mov: Movimiento)(enemigo: Guerrero): (Guerrero, Guerrero, Option[Guerrero]) = {
+    val (guerreroResultado, enemigoResultado) = ejecutar(mov, enemigo)
+    val (enemigoFinal, guerreroFinal) = enemigoResultado.ejecutar(enemigoResultado.movimientoMasEfectivoContra(guerreroResultado, DejarMasKi), guerreroResultado)
+    if (enemigoFinal.estado == Muerto) {
+      (guerreroFinal, enemigoFinal, Some(guerreroFinal))
+    } else if(guerreroFinal.estado == Muerto){
+      (guerreroFinal, enemigoFinal, Some(enemigoFinal))
     } else {
-      (this,enemigo,None)
+      (guerreroFinal, enemigoFinal, None)
     }
   }
+
   def recibirGolpeKi(cantidad: Int): Guerrero ={
     raza match {
       case monstruo: Monstruo => this.cambiarEnergia((-2) * cantidad) //GAS: Le agrego para que matchee

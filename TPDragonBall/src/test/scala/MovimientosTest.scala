@@ -2,35 +2,40 @@ import domain._
 import domain.TiposMovimientos._
 import org.scalatest._
 
-class MovimientosTest extends FlatSpec with Matchers {
+class MovimientosTest extends FlatSpec with Matchers with BeforeAndAfter {
 
-  it should "Persona carga su Ki" in {
-    val pedro = Guerrero(100,Ki(80), List(CargarKi), Nil, Consciente, _, Humano)
+  it should "Persona carga su Ki sin pasarse del maximo" in {
+    val pedro = Guerrero(100, Ki(80), List(CargarKi), Nil, Consciente, 0, Humano)
     println("pedro antes de cargar energia")
     println(pedro)
     println("pedro despues de cargar energia")
-    val pedroConEnergia = pedro.ejecutar(CargarKi, null)
+    val pedroConEnergia = pedro.ejecutar(CargarKi, null)._1
     println(pedroConEnergia)
-    assert(pedroConEnergia.energia.cant == 180)
+    assert(pedroConEnergia.energia.cant == 100)
   }
 
   it should "Persona elige un movimiento" in {
     val chumbo = Arma(tipo = DeFuego)
 
-    //val usarSemilla = UsarItem(Semilla)(_,_)
-
     val usarArma = UsarItem(chumbo)(_,_)
 
-    //val fusionarConKrillin = Fusion(krillin)(_,_)
+    val goku  = Guerrero(100, Ki(80), List(CargarKi, CargarMenosKi, UsarSemilla, usarArma), List(Semilla), Consciente, 0, Humano)
+    val vegeta = Guerrero(100, Ki(20), Nil, Nil, Consciente, 0, Humano)
 
-    val goku = Guerrero(100, Ki(80), List(CargarKi, CargarMenosKi, UsarSemilla, usarArma), Nil, Consciente, _, Humano)
-    val vegeta = Guerrero(100, Ki(20), Nil, Nil, Consciente, _, Humano)
-
-    val mejorMov = goku.movimentoMasEfectivoContra(vegeta, DejarMasKi)
+    val mejorMov = goku.movimientoMasEfectivoContra(vegeta, DejarMasKi)
 
     assert(mejorMov == UsarSemilla)
   }
 
+  it should "Pelear un round" in {
+    val krillin  = Guerrero(100, Ki(10), List(CargarKi, CargarMenosKi), List(Semilla), Consciente, 0, Humano)
+
+    val piccolo = Guerrero(100, Ki(20), List(GolpesNinja), Nil, Consciente, 0, Namekusein)
+
+    val round = piccolo.pelearRound(GolpesNinja)(krillin)
+    println(round._2.energia)
+    assert(round._3.contains(piccolo))
+  }
 }
 
  /*
