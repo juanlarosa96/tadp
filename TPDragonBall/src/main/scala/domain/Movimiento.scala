@@ -134,8 +134,22 @@ object TiposMovimientos {
     guerrero.raza match {
       case Androide => (guerrero.cambiarEnergia(-guerrero.energiaMaxima), enemigo.cambiarEnergia(guerrero.energia.cant * (-3)))
       case Namekusein => (guerrero.cambiarEnergia(1 - guerrero.energia.cant), enemigo.cambiarEnergia(guerrero.energia.cant * (-2)))
-      case Humano => (guerrero, enemigo)
+      case _ => (guerrero, enemigo)
     }
   }
+
+  def Onda(onda:Onda)(guerrero: Guerrero, enemigo: Guerrero): (Guerrero, Guerrero) = {
+    onda match
+      case Genkidama => if(guerrero.roundsDejadoFajar > 1) (guerrero, enemigo.redibirGolpeKi(math.pow(10,guerrero.roundsDejadoFajar)))
+      case _ = if(guerrero.energia.cant >= onda.cantidadKi) (guerrero, enemigo.redibirGolpeKi(onda.cantidadKi)) else (guerrero,enemigo)
+  }
 }
+
+abstract class Onda
+
+case object Kamehameha { def cantidadKi = 100} extends FuenteDeEnergia
+case object Genkidama extends FuenteDeEnergia
+
+
+
 
