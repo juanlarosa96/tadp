@@ -2,6 +2,7 @@ package domain
 
 import domain.TiposMovimientos._
 import enums.TipoMonstruo._
+import scala.util.control.Breaks._
 
 
 case class Guerrero(energiaMaxima: Int,
@@ -142,6 +143,47 @@ case class Guerrero(energiaMaxima: Int,
     
     PlanDeAtaque(movimientosElegidos, cantidadDeRounds, unCriterio)
   }
+  
+  def pelearContra(enemigo:Guerrero)(plan:PlanDeAtaque):ResultadoPelea = {
+    
+    /* IDEA SIN TERMINAR, me parece que hay que primero hacer Map de movimientos a pelearRound y hacer funcion
+     * Hay que ver como implementar que corte y no siga peleando si alguno murio..
+    //Uso Foldeo para realizar todos los rounds
+    val semilla:Movimiento =  plan.movimientos.head
+    //Necesito ayuda para componer los movimientos
+    val componerMovs: ((Movimiento,Movimiento) => Movimiento) = (mov:Movimiento, anterior:Movimiento) => (  mov( (g:Guerrero, e:Guerrero) => anterior(g,e)  )   )
+    
+    var resultado:(Guerrero,Guerrero) = plan.movimientos.tail.foldLeft( semilla )( componerMovs )(this,enemigo)
+    
+    
+     *
+     */
+    var guerreros:(Guerrero, Guerrero, Option[Guerrero]) = (this, enemigo, None)      //Para facilitar trabajar con pelearRound en el Ciclo, guardo en esta variable los resultados paso a paso
+    //Defino funciones para abstraer nombre a lo de arriba
+    def miGuerrero  =   guerreros._1
+    def elEnemigo   =   guerreros._2
+    
+    //Defino funciones auxiliares con Nombre Representativo
+    def murio = (unGuerrero:Guerrero) => unGuerrero.estado == Muerto
+    def algunoMurio = murio(miGuerrero) || murio(elEnemigo)
+    
+    
+    //Para que pueda usar Break en el For
+    breakable {
+          for( roundActual <- 1 to plan.cantidadRunds ){
+            //Elijo Movimiento mas efectivo
+             var mov = miGuerrero.movimientoMasEfectivoContra(elEnemigo, plan.criterio)
+             //Simulo la Pelea y guardo los resultados
+             guerreros = miGuerrero.pelearRound(mov)(elEnemigo)
+             
+             //Corto si Alguno Murio, el otro Gano
+             if(algunoMurio) break;
+          }
+    }
+    
+    ResultadoPelea(miGuerrero, elEnemigo, guerreros._3)
+  }
+  
 
 
 }
