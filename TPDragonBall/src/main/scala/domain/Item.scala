@@ -7,9 +7,7 @@ abstract class Item
 
 case object Semilla extends Item
 
-case class Esfera(cantidad: Int) extends Item {
-  def consumir = this.copy(cantidad - 1)
-}
+case object Esfera extends Item
 
 case object Municion extends Item
 
@@ -26,7 +24,7 @@ case object Roma extends TipoArma {
   def puedeBajar(guerrero: Guerrero): Boolean = {
     guerrero.raza match {
       case Androide => false
-      case otro if guerrero.energia.cant > 300 => true
+      case otro if guerrero.energia > 300 => true
       case _ => false
     }
   }

@@ -7,14 +7,14 @@ trait Criterio {
 case object RealizarMasDanio extends Criterio {
   def apply(guerreroFinal: Guerrero): Int = {
     //Devuelvo la diferencia con respecto a la vida maxima, osea lo que le quitaron, osea el daño recibido
-    guerreroFinal.energiaMaxima - guerreroFinal.energia.cant
+    guerreroFinal.energiaMaxima - guerreroFinal.energia
   }
 }
 
 case object DejarMasKi extends Criterio {
   def apply(guerreroFinal: Guerrero): Int = {
     //Devuelvo simplemente el KI, porque luego se ordenara por mayor Ki
-    guerreroFinal.energia.cant
+    guerreroFinal.energia
   }
 }
 
@@ -31,7 +31,7 @@ case object MovimientoNoMataUsuario extends Criterio {
     //Le puse 5 si el movimiento si no lo mata y 0 si lo hace.
     //Al Ordenar ordenara los de 5 primeros y al final los de 0
     //TODO Estaria bueno cambiarlo por algo mejor. ¿Sugerencias? ---> podemos filtrar por los que devuelven 5, y los que devuelve 0 se ignoran
-    if (guerreroFinal.energia.cant >= 1) 1 else 0
+    if (guerreroFinal.energia >= 1) 1 else 0
   }
 }
 

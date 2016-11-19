@@ -1,13 +1,11 @@
 package domain
 
 import domain.TiposMovimientos._
-import enums.TipoMonstruo
 import enums.TipoMonstruo._
 
-import scala.util.Try
 
 case class Guerrero(energiaMaxima: Int,
-                    energia: FuenteDeEnergia,
+                    energia: Int,
                     movimientos: List[Movimiento],
                     inventario: List[Item],
                     estado: Estado,
@@ -22,7 +20,7 @@ case class Guerrero(energiaMaxima: Int,
     }
   }
 
-  def dejarseFajar: Guerrero = this
+  def dejarseFajar: Guerrero = copy(roundsDejadoFajar = roundsDejadoFajar + 1)
 
   def alterarEstado(estadoNuevo: Estado): Guerrero = {
     estadoNuevo match {
@@ -37,55 +35,47 @@ case class Guerrero(energiaMaxima: Int,
     this.copy(estado = estadoNuevo)
   }
 
-  def tieneItem(esTipoItem: Item => Boolean): Boolean = {
-    inventario.filter { item => esTipoItem(item) }.size > 0
-  }
-  //Creo abstracciones para leer mas sencillo
+  def tieneItem(item: Item): Boolean = inventario.contains(item)
 
-  def queSeaMunicion = { i: Item => i.getClass == Municion }
-
-  def tieneMunicion = this.tieneItem { queSeaMunicion };
-  
-  //TODO Podria rescribirse usando tieneItem
-  def tiene7Esferas(): Boolean = {
-    inventario.exists {
-      case esfera: Esfera => esfera.cantidad == 7
-    }
-  }
+  def tiene7Esferas: Boolean = inventario.count(_ == Esfera) == 7
 
   def puedeUsarItem(item: Item): Boolean = {
     item match {
-      case arma: Arma if arma.tipo == DeFuego => this.inventario.contains(item) && this.tieneMunicion
+      case arma: Arma if arma.tipo == DeFuego => this.inventario.contains(item) && this.tieneItem(Municion)
       case _                                  => this.inventario.contains(item)
     }
   }
 
-  def consumirItem(esTipoItem: Item => Boolean): Guerrero = {
-    val itemPorConsumir = inventario.find { item => esTipoItem(item) }
-    val nuevoInventario: List[Item] = inventario.filterNot { i => i == itemPorConsumir }
-
-    this.copy(inventario = nuevoInventario)
+  def consumirItem(item: Item): Guerrero = {
+    val index = inventario.indexOf(item)
+    if (index < 0) {
+      this
+    } else if (index == 0) {
+      copy(inventario = inventario.tail)
+    } else {
+      val (ppioLista, finLista) = inventario.splitAt(index)
+      copy(inventario = ppioLista ++ finLista.tail)
+    }
   }
-  def consumirMunicion = this.consumirItem { queSeaMunicion }
 
   //Usa Todas las esferas que tiene
   def usarEsferas: Guerrero = {
-    this.copy(inventario = inventario.filter(_.getClass != Esfera))
+    copy(inventario = inventario.filter(_ != Esfera))
   }
 
   //Creo metodo porque se esta repitiendo todo el tiempo lo mismo
   def cambiarEnergia(valor: Int): Guerrero = {
     if (sePasaDeEnergia(valor))
-      this.copy(energia = Ki(this.energiaMaxima))
+      this.copy(energia = this.energiaMaxima)
     else if (energiaMenorOIgualACero(valor))
-      this.copy(energia = Ki(0), estado = Muerto)
+      this.copy(energia = 0, estado = Muerto)
     else
-      this.copy(energia = Ki(energia.cant + valor))
+      this.copy(energia = energia + valor)
   }
 
-  def sePasaDeEnergia(valor: Int): Boolean = energia.cant + valor > energiaMaxima
+  def sePasaDeEnergia(valor: Int): Boolean = energia + valor > energiaMaxima
 
-  def energiaMenorOIgualACero(valor: Int): Boolean = energia.cant + valor <= 0
+  def energiaMenorOIgualACero(valor: Int): Boolean = energia + valor <= 0
 
   def movimientoMasEfectivoContra(enemigo: Guerrero, unCriterio: Criterio): Movimiento = {
     val resultados: List[(Movimiento, Int)] = for {
@@ -183,14 +173,3 @@ trait Transformacion
 case class SuperSaiyajin(nivel: Int) extends Transformacion //Antes extendia de Guerrero
 case object Mono extends Transformacion
 case object Normal extends Transformacion
-
-// ------------------------- FUENTES DE ENERGIA --------------------------
-
-abstract class FuenteDeEnergia {
-  def cant: Int
-}
-
-case class Ki(cant: Int) extends FuenteDeEnergia
-case class Bateria(cant: Int) extends FuenteDeEnergia
-
-
