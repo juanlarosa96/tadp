@@ -127,6 +127,36 @@ case class Guerrero(energiaMaxima: Int,
     
     PlanDeAtaque(movimientosElegidos, cantidadDeRounds, unCriterio)
   }
+  
+  def pelearContra(enemigo:Guerrero)(plan:PlanDeAtaque):ResultadoPelea = {
+    
+    /* IDEA SIN TERMINAR, me parece que hay que primero hacer Map de movimientos a pelearRound y hacer funcion
+    //Uso Foldeo para realizar todos los rounds
+    val semilla:Movimiento =  plan.movimientos.head
+    //Necesito ayuda para componer los movimientos
+    val componerMovs: ((Movimiento,Movimiento) => Movimiento) = (mov:Movimiento, anterior:Movimiento) => (  mov( (g:Guerrero, e:Guerrero) => anterior(g,e)  )   )
+    
+    var resultado:(Guerrero,Guerrero) = plan.movimientos.tail.foldLeft( semilla )( componerMovs )(this,enemigo)
+    
+    
+     *
+     */
+    var guerreros:(Guerrero, Guerrero, Option[Guerrero]) = (this, enemigo, None)      //Para facilitar trabajar con pelearRound en el Ciclo, guardo en esta variable los resultados paso a paso
+    //Defino funciones para abstraer nombre a lo de arriba
+    def miGuerrero  =   guerreros._1
+    def elEnemigo   =   guerreros._2
+    
+    
+    for( roundActual <- 1 to plan.cantidadRunds ){
+      //Elijo Movimiento mas efectivo
+       var mov = miGuerrero.movimientoMasEfectivoContra(elEnemigo, plan.criterio)
+       //Simulo la Pelea y guardo los resultados
+       guerreros = miGuerrero.pelearRound(mov)(elEnemigo)
+    }
+    
+    ResultadoPelea(miGuerrero, elEnemigo, guerreros._3)
+  }
+  
 
   def recibirGolpeKi(cantidad: Int): Guerrero = {
     raza match {
