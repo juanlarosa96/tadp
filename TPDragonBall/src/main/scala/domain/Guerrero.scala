@@ -102,11 +102,10 @@ case class Guerrero(energiaMaxima: Int,
       guerreroPostMov = this.ejecutar(mov, enemigo)
 
       //valoro movimiento segun criterio
-      valor = unCriterio(guerreroPostMov._1)
+      valor = unCriterio(guerreroPostMov._1, guerreroPostMov._2)
 
     } yield (mov, valor)
 
-    println(resultados.sortBy(_._2).reverse)
     //Ordeno por Mayor puntaje segun criterio y obtengo el primero
     resultados.sortBy(_._2).map(_._1).reverse.head
   }
@@ -158,7 +157,8 @@ case class Guerrero(energiaMaxima: Int,
     
      *
      */
-    var guerreros:(Guerrero, Guerrero, Option[Guerrero]) = (this, enemigo, None)      //Para facilitar trabajar con pelearRound en el Ciclo, guardo en esta variable los resultados paso a paso
+
+    var guerreros: (Guerrero, Guerrero, Option[Guerrero]) = (this, enemigo, None)      //Para facilitar trabajar con pelearRound en el Ciclo, guardo en esta variable los resultados paso a paso
     //Defino funciones para abstraer nombre a lo de arriba
     def miGuerrero  =   guerreros._1
     def elEnemigo   =   guerreros._2
@@ -177,7 +177,8 @@ case class Guerrero(energiaMaxima: Int,
              guerreros = miGuerrero.pelearRound(mov)(elEnemigo)
              
              //Corto si Alguno Murio, el otro Gano
-             if(algunoMurio) break;
+             if(algunoMurio)
+               break
           }
     }
     

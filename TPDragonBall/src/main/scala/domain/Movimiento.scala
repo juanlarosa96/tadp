@@ -128,15 +128,17 @@ object TiposMovimientos {
       case _ => (guerrero, enemigo)
     }
   }
+
+  abstract class Onda
+  case object Genkidama extends Onda
+
+  abstract class OndaChica extends Onda { val cantidadKiRequerida: Int }
+  case object Kamehameha extends OndaChica { val cantidadKiRequerida = 100 }
+  case object Dodonpa extends OndaChica { val cantidadKiRequerida = 20}
+
+  val UsarGenkidama: Movimiento = Onda(Genkidama)
+  val UsarKamehameha: Movimiento = Onda(Kamehameha)
 }
-
-abstract class Onda
-case object Genkidama extends Onda
-
-abstract class OndaChica extends Onda { val cantidadKiRequerida: Int }
-case object Kamehameha extends OndaChica { val cantidadKiRequerida = 100 }
-case object Dodonpa extends OndaChica { val cantidadKiRequerida = 20}
-
 
 
 
