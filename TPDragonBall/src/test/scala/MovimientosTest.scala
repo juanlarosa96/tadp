@@ -4,7 +4,7 @@ import enums.TipoMonstruo
 import org.scalatest._
 
 class MovimientosTest extends FlatSpec with Matchers with BeforeAndAfter {
-/*
+
   it should "Persona carga su Ki sin pasarse del maximo" in {
     val pedro = Guerrero(100, 80, List(CargarKi), Nil, Consciente, 0, Humano)
     val pedroConEnergia = pedro.ejecutar(CargarKi, null)._1
@@ -58,7 +58,7 @@ class MovimientosTest extends FlatSpec with Matchers with BeforeAndAfter {
 
     assert(mejorMov == UsarGenkidama)
   }
-*/
+
   it should "Pelear un round" in {
     val krillin  = Guerrero(100, 10, List(CargarKi), List(Semilla), Consciente, 0, Humano)
     val piccolo = Guerrero(100, 20, List(GolpesNinja), Nil, Consciente, 0, Namekusein)

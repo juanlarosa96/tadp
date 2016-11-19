@@ -5,6 +5,11 @@ object TiposMovimientos {
   type Movimiento = (Guerrero, Guerrero) => (Guerrero, Guerrero)
   //guerrero, enemigo(Gas: Lo puse como option para probar, antes era Guerrero)
 
+  val DejarseFajar: Movimiento = {
+    (guerrero: Guerrero, enemigo: Guerrero) =>
+      (guerrero.copy(roundsDejadoFajar = guerrero.roundsDejadoFajar + 1), enemigo)
+  }
+
   val CargarKi: Movimiento = {
     (guerrero: Guerrero, None) =>
       guerrero.raza match {

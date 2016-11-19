@@ -29,7 +29,7 @@ case class Guerrero(energiaMaxima: Int,
     }
   }
 
-  def dejarseFajar: Guerrero = copy(roundsDejadoFajar = roundsDejadoFajar + 1)
+
 
   def alterarEstado(estadoNuevo: Estado): Guerrero = {
     estadoNuevo match {
@@ -107,7 +107,7 @@ case class Guerrero(energiaMaxima: Int,
     } yield (mov, valor)
 
     //Ordeno por Mayor puntaje segun criterio y obtengo el primero
-    resultados.sortBy(_._2).map(_._1).reverse.head
+    if (resultados.isEmpty) DejarseFajar else resultados.sortBy(_._2).map(_._1).reverse.head
   }
 
   def pelearRound(mov: Movimiento)(enemigo: Guerrero): (Guerrero, Guerrero, Option[Guerrero]) = {
@@ -121,40 +121,40 @@ case class Guerrero(energiaMaxima: Int,
       (guerreroFinal, enemigoFinal, None)
     }
   }
-  
+
   def planDeAtaqueContra(enemigo: Guerrero, cantidadDeRounds: Int)(unCriterio: Criterio): PlanDeAtaque = {
     var movimientosElegidos: List[Movimiento] = Nil
     var guerreros: (Guerrero, Guerrero, Option[Guerrero]) = (this, enemigo, None)      //Para facilitar trabajar con pelearRound en el Ciclo, guardo en esta variable los resultados paso a paso
     //Defino funciones para abstraer nombre a lo de arriba
     def miGuerrero  =   guerreros._1
     def elEnemigo   =   guerreros._2
-    
-    
+
+
     for( roundActual <- 1 to cantidadDeRounds ){
       //Elijo Movimiento mas efectivo
        val mov = miGuerrero.movimientoMasEfectivoContra(elEnemigo, unCriterio)
        //Simulo la Pelea y guardo los resultados
        guerreros = miGuerrero.pelearRound(mov)(elEnemigo)
-       
+
        //Podria hacerse alguna validacion antes de agregar el movimiento, si fuera necesario..
        movimientosElegidos = movimientosElegidos union List(mov)
     }
-    
+
     PlanDeAtaque(movimientosElegidos, cantidadDeRounds, unCriterio)
   }
-  
+
   def pelearContra(enemigo:Guerrero)(plan:PlanDeAtaque):ResultadoPelea = {
-    
+
     /* IDEA SIN TERMINAR, me parece que hay que primero hacer Map de movimientos a pelearRound y hacer funcion
      * Hay que ver como implementar que corte y no siga peleando si alguno murio..
     //Uso Foldeo para realizar todos los rounds
     val semilla:Movimiento =  plan.movimientos.head
     //Necesito ayuda para componer los movimientos
     val componerMovs: ((Movimiento,Movimiento) => Movimiento) = (mov:Movimiento, anterior:Movimiento) => (  mov( (g:Guerrero, e:Guerrero) => anterior(g,e)  )   )
-    
+
     var resultado:(Guerrero,Guerrero) = plan.movimientos.tail.foldLeft( semilla )( componerMovs )(this,enemigo)
-    
-    
+
+
      *
      */
 
@@ -162,12 +162,12 @@ case class Guerrero(energiaMaxima: Int,
     //Defino funciones para abstraer nombre a lo de arriba
     def miGuerrero  =   guerreros._1
     def elEnemigo   =   guerreros._2
-    
+
     //Defino funciones auxiliares con Nombre Representativo
     def murio = (unGuerrero:Guerrero) => unGuerrero.estado == Muerto
     def algunoMurio = murio(miGuerrero) || murio(elEnemigo)
-    
-    
+
+
     //Para que pueda usar Break en el For
     breakable {
           for( roundActual <- 1 to plan.cantidadRunds ){
