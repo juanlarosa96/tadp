@@ -4,10 +4,10 @@ import enums.TipoMonstruo
 import org.scalatest._
 
 class MovimientosTest extends FlatSpec with Matchers with BeforeAndAfter {
-/*
+
   it should "Persona carga su Ki sin pasarse del maximo" in {
     val pedro = Guerrero(100, 80, List(CargarKi), Nil, Consciente, 0, Humano)
-    val pedroConEnergia = pedro.ejecutar(CargarKi, null)._1
+    val pedroConEnergia = pedro.ejecutar(Some(CargarKi), null)._1
 
     assert(pedroConEnergia.energia == 100)
   }
@@ -47,7 +47,7 @@ class MovimientosTest extends FlatSpec with Matchers with BeforeAndAfter {
 
     val mejorMov = goku.movimientoMasEfectivoContra(vegeta, DejarMasKi)
 
-    assert(mejorMov == UsarSemilla)
+    assert(mejorMov.contains(UsarSemilla))
   }
 
   it should "Persona elige movimiento que mas pegue" in {
@@ -56,18 +56,18 @@ class MovimientosTest extends FlatSpec with Matchers with BeforeAndAfter {
 
     val mejorMov = goku.movimientoMasEfectivoContra(vegeta, RealizarMasDanio)
 
-    assert(mejorMov == UsarGenkidama)
+    assert(mejorMov.contains(UsarGenkidama))
   }
-*/
+
   it should "Pelear un round" in {
     val krillin  = Guerrero(100, 10, List(CargarKi), List(Semilla), Consciente, 0, Humano)
-    val piccolo = Guerrero(100, 20, List(GolpesNinja), Nil, Consciente, 0, Namekusein)
+    val piccolo = Guerrero(100, 50, List(GolpesNinja), Nil, Consciente, 0, Namekusein)
 
     val round = piccolo.pelearRound(GolpesNinja)(krillin)
 
     assert(round._3.contains(piccolo))
   }
-/*
+
   it should "Yajirobe tiene su plan de ataque" in {
     val yajirobe = Guerrero(1000, 1000, List(CargarKi, UsarSemilla, GolpesNinja, UsarEspada), List(Arma(Filosa), Semilla), Consciente, 0, Humano)
     val cell = Guerrero(2000, 1500, List(GolpesNinja), Nil, Consciente, 0, Monstruo(TipoMonstruo.CELL))
@@ -75,7 +75,7 @@ class MovimientosTest extends FlatSpec with Matchers with BeforeAndAfter {
     val planDeAtaqueDeYajirobe = yajirobe.planDeAtaqueContra(cell, 2)(DejarMasKi)
 
     assertResult(true){
-      planDeAtaqueDeYajirobe.movimientos == List(UsarEspada, UsarSemilla) //IMPORTA EL ORDEN EN QUE SE GUARDAN LOS MOVIMIENTOS DE IGUAL VALOR PARA EL CRITERIO
+      planDeAtaqueDeYajirobe.movimientos == List(Some(UsarEspada), Some(UsarSemilla)) //IMPORTA EL ORDEN EN QUE SE GUARDAN LOS MOVIMIENTOS DE IGUAL VALOR PARA EL CRITERIO
     }
   }
 
@@ -84,5 +84,5 @@ class MovimientosTest extends FlatSpec with Matchers with BeforeAndAfter {
     val goku = Guerrero(2000, 2000, List(GolpesNinja, Onda(Genkidama), Onda(Kamehameha)), Nil, Consciente, 0, Saiyajin(cola = false, Normal))
   }
 */
-*/
+
 }

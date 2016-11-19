@@ -13,11 +13,15 @@ case class Guerrero(energiaMaxima: Int,
                     roundsDejadoFajar: Int,
                     raza: Raza) {
 
-  def ejecutar(mov: Movimiento, enemigo: Guerrero): (Guerrero, Guerrero) = { //GAS: Lo cambio a guerrero, guerrero
-    estado match {
-      case Consciente                         => mov(this, enemigo)
-      case Inconsciente if mov == UsarSemilla => mov(this, enemigo)
-      case _                                  => (this, enemigo) //MUERTO NO PUEDE USAR SEMILLA
+  def ejecutar(mov: Option[Movimiento], enemigo: Guerrero): (Guerrero, Guerrero) = {
+    mov match {
+      case Some(movimiento) =>
+        estado match {
+          case Consciente => movimiento(this, enemigo)
+          case Inconsciente if mov == UsarSemilla => movimiento(this, enemigo)
+          case _ => (this, enemigo)
+        }
+      case None => (this, enemigo)
     }
   }
 
@@ -92,14 +96,14 @@ case class Guerrero(energiaMaxima: Int,
 
   def energiaMenorOIgualACero(valor: Int): Boolean = energia + valor <= 0
 
-  def movimientoMasEfectivoContra(enemigo: Guerrero, unCriterio: Criterio): Movimiento = {
+  def movimientoMasEfectivoContra(enemigo: Guerrero, unCriterio: Criterio): Option[Movimiento] = {
     val resultados: List[(Movimiento, Int)] = for {
 
       //Por cada movimiento del guerrero
       mov <- this.movimientos.filter(puedeEjecutar)
 
       //ejecuto movimiento
-      guerreroPostMov = this.ejecutar(mov, enemigo)
+      guerreroPostMov = this.ejecutar(Some(mov), enemigo)
 
       //valoro movimiento segun criterio
       valor = unCriterio(guerreroPostMov._1, guerreroPostMov._2)
@@ -107,11 +111,11 @@ case class Guerrero(energiaMaxima: Int,
     } yield (mov, valor)
 
     //Ordeno por Mayor puntaje segun criterio y obtengo el primero
-    resultados.sortBy(_._2).map(_._1).reverse.head
+    if (resultados.isEmpty) None else Some(resultados.sortBy(_._2).map(_._1).reverse.head)
   }
 
   def pelearRound(mov: Movimiento)(enemigo: Guerrero): (Guerrero, Guerrero, Option[Guerrero]) = {
-    val (guerreroResultado, enemigoResultado) = ejecutar(mov, enemigo)
+    val (guerreroResultado, enemigoResultado) = ejecutar(Some(mov), enemigo)
     val (enemigoFinal, guerreroFinal) = enemigoResultado.ejecutar(enemigoResultado.movimientoMasEfectivoContra(guerreroResultado, DejarMasKi), guerreroResultado)
     if (enemigoFinal.estado == Muerto) {
       (guerreroFinal, enemigoFinal, Some(guerreroFinal))
@@ -134,10 +138,10 @@ case class Guerrero(energiaMaxima: Int,
       //Elijo Movimiento mas efectivo
        val mov = miGuerrero.movimientoMasEfectivoContra(elEnemigo, unCriterio)
        //Simulo la Pelea y guardo los resultados
-       guerreros = miGuerrero.pelearRound(mov)(elEnemigo)
+       guerreros = miGuerrero.pelearRound(mov.get)(elEnemigo)
        
        //Podria hacerse alguna validacion antes de agregar el movimiento, si fuera necesario..
-       movimientosElegidos = movimientosElegidos union List(mov)
+       movimientosElegidos = movimientosElegidos union List(mov.get)
     }
     
     PlanDeAtaque(movimientosElegidos, cantidadDeRounds, unCriterio)
@@ -174,7 +178,7 @@ case class Guerrero(energiaMaxima: Int,
             //Elijo Movimiento mas efectivo
              var mov = miGuerrero.movimientoMasEfectivoContra(elEnemigo, plan.criterio)
              //Simulo la Pelea y guardo los resultados
-             guerreros = miGuerrero.pelearRound(mov)(elEnemigo)
+             guerreros = miGuerrero.pelearRound(mov.get)(elEnemigo)
              
              //Corto si Alguno Murio, el otro Gano
              if(algunoMurio)
