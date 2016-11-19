@@ -20,6 +20,14 @@ case class Guerrero(energiaMaxima: Int,
     }
   }
 
+  def puedeEjecutar(mov: Movimiento): Boolean = {
+    mov match {
+      case UsarSemilla => puedeUsarItem(Semilla)
+      case UsarArmaDeFuego => puedeUsarItem(Arma(DeFuego))
+      case _ => estado == Consciente
+    }
+  }
+
   def dejarseFajar: Guerrero = copy(roundsDejadoFajar = roundsDejadoFajar + 1)
 
   def alterarEstado(estadoNuevo: Estado): Guerrero = {
@@ -27,8 +35,8 @@ case class Guerrero(energiaMaxima: Int,
       case Consciente => this.copy(estado = estadoNuevo)
       case _ =>
         raza match {
-          case Saiyajin(cola, _) => this.copy(raza = Saiyajin(cola, Normal), roundsDejadoFajar = 0) //cambio algo aca. QUE ES ESTO?
-          case _                 => this.copy(roundsDejadoFajar = 0)
+          case Saiyajin(cola, _) => copy(raza = Saiyajin(cola, Normal), roundsDejadoFajar = 0) //cambio algo aca. QUE ES ESTO?
+          case _                 => copy(roundsDejadoFajar = 0)
         }
     }
 
@@ -41,8 +49,16 @@ case class Guerrero(energiaMaxima: Int,
 
   def puedeUsarItem(item: Item): Boolean = {
     item match {
-      case arma: Arma if arma.tipo == DeFuego => this.inventario.contains(item) && this.tieneItem(Municion)
-      case _                                  => this.inventario.contains(item)
+      case arma: Arma if arma.tipo == DeFuego => inventario.contains(item) && tieneItem(Municion)
+      case _                                  => inventario.contains(item)
+    }
+  }
+
+  def recibirGolpeKi(cantidad: Int): Guerrero = {
+    raza match {
+      case monstruo: Monstruo => cambiarEnergia((-2) * cantidad)
+      case Androide           => cambiarEnergia(cantidad)
+      case _                  => cambiarEnergia(-cantidad)
     }
   }
 
@@ -59,18 +75,16 @@ case class Guerrero(energiaMaxima: Int,
   }
 
   //Usa Todas las esferas que tiene
-  def usarEsferas: Guerrero = {
-    copy(inventario = inventario.filter(_ != Esfera))
-  }
+  def usarEsferas: Guerrero = copy(inventario = inventario.filter(_ != Esfera))
 
   //Creo metodo porque se esta repitiendo todo el tiempo lo mismo
   def cambiarEnergia(valor: Int): Guerrero = {
     if (sePasaDeEnergia(valor))
-      this.copy(energia = this.energiaMaxima)
+      copy(energia = energiaMaxima)
     else if (energiaMenorOIgualACero(valor))
-      this.copy(energia = 0, estado = Muerto)
+      copy(energia = 0, estado = Muerto)
     else
-      this.copy(energia = energia + valor)
+      copy(energia = energia + valor)
   }
 
   def sePasaDeEnergia(valor: Int): Boolean = energia + valor > energiaMaxima
@@ -81,7 +95,7 @@ case class Guerrero(energiaMaxima: Int,
     val resultados: List[(Movimiento, Int)] = for {
 
       //Por cada movimiento del guerrero
-      mov <- this.movimientos
+      mov <- this.movimientos.filter(puedeEjecutar)
 
       //ejecuto movimiento
       guerreroPostMov = this.ejecutar(mov, enemigo)
@@ -91,6 +105,7 @@ case class Guerrero(energiaMaxima: Int,
 
     } yield (mov, valor)
 
+    println(resultados.sortBy(_._2).reverse)
     //Ordeno por Mayor puntaje segun criterio y obtengo el primero
     resultados.sortBy(_._2).map(_._1).reverse.head
   }
@@ -107,9 +122,9 @@ case class Guerrero(energiaMaxima: Int,
     }
   }
   
-  def planDeAtaqueContra(enemigo: Guerrero, cantidadDeRounds: Int)(unCriterio: Criterio) :PlanDeAtaque = {
-    var movimientosElegidos:List[Movimiento] = List()
-    var guerreros:(Guerrero, Guerrero, Option[Guerrero]) = (this, enemigo, None)      //Para facilitar trabajar con pelearRound en el Ciclo, guardo en esta variable los resultados paso a paso
+  def planDeAtaqueContra(enemigo: Guerrero, cantidadDeRounds: Int)(unCriterio: Criterio): PlanDeAtaque = {
+    var movimientosElegidos: List[Movimiento] = Nil
+    var guerreros: (Guerrero, Guerrero, Option[Guerrero]) = (this, enemigo, None)      //Para facilitar trabajar con pelearRound en el Ciclo, guardo en esta variable los resultados paso a paso
     //Defino funciones para abstraer nombre a lo de arriba
     def miGuerrero  =   guerreros._1
     def elEnemigo   =   guerreros._2
@@ -117,7 +132,7 @@ case class Guerrero(energiaMaxima: Int,
     
     for( roundActual <- 1 to cantidadDeRounds ){
       //Elijo Movimiento mas efectivo
-       var mov = miGuerrero.movimientoMasEfectivoContra(elEnemigo, unCriterio)
+       val mov = miGuerrero.movimientoMasEfectivoContra(elEnemigo, unCriterio)
        //Simulo la Pelea y guardo los resultados
        guerreros = miGuerrero.pelearRound(mov)(elEnemigo)
        
@@ -128,13 +143,6 @@ case class Guerrero(energiaMaxima: Int,
     PlanDeAtaque(movimientosElegidos, cantidadDeRounds, unCriterio)
   }
 
-  def recibirGolpeKi(cantidad: Int): Guerrero = {
-    raza match {
-      case monstruo: Monstruo => this.cambiarEnergia((-2) * cantidad) //GAS: Le agrego para que matchee
-      case Androide           => this.cambiarEnergia(cantidad)
-      case _                  => this.cambiarEnergia(-cantidad)
-    }
-  }
 
 }
 

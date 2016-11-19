@@ -1,17 +1,5 @@
 package domain
 
-
-/*
- * LEO: Lo dejo solo por los comentarios
- *
- *
-trait Movimiento { //TODO no deja cargarlos en la lista de movimientos, pero si se puede tratar polimorficamente viendolo como un movimiento, ej en ejecutar, preguntar
-  //Por LEO: Fijate si ahora dejar Cargarlos, deberia dejarte
-  //Debe ser Try porque podria fallar un guerrero al intentar ejecutar algo que no deberia
-}
-*/
-
-
 object TiposMovimientos {
   //LEO: Debo devolver ambos guerreros porque hay algunos movimiento que modifican a los 2
   type Movimiento = (Guerrero, Guerrero) => (Guerrero, Guerrero)
@@ -48,7 +36,9 @@ object TiposMovimientos {
   //GAS: falta chequear que el guerrero tenga el item en su inventario
   //GAS: delegar un poco en cada item (o aunque sea en arma)
 
-  val UsarSemilla: Movimiento = UsarItem(Semilla)(_, _)
+  val UsarSemilla: Movimiento = UsarItem(Semilla)
+  val UsarEspada: Movimiento = UsarItem(Arma(Filosa))
+  val UsarArmaDeFuego: Movimiento = UsarItem(Arma(DeFuego))
 
   def UsarItem(item: Item)(guerrero: Guerrero, enemigo: Guerrero): (Guerrero, Guerrero) = {
     if (guerrero.puedeUsarItem(item)) {
@@ -70,14 +60,13 @@ object TiposMovimientos {
               enemigo.raza match {
                 case saiyajin: Saiyajin if saiyajin.cola =>
                   (guerrero, enemigo.alterarEstado(Inconsciente).copy(raza = saiyajin.cortarCola, energia = 1))
-                      //enemigo.copy(energia = Ki(1), raza = Saiyajin(cola = false, transformacion = Normal)))
                 case otro =>
                   (guerrero, enemigo.cambiarEnergia(-(guerrero.energia / 100)))
               }
             case otro =>(guerrero,enemigo)
           }
         case Semilla =>
-          (guerrero.copy(energia = guerrero.energiaMaxima), enemigo) //TODO sacar semillas
+          (guerrero.copy(energia = guerrero.energiaMaxima).consumirItem(Semilla), enemigo) //TODO sacar semillas
         //TODO Pendiente las demas armas
       }
     } else {
