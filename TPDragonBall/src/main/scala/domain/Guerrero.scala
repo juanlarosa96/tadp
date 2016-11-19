@@ -16,22 +16,33 @@ case class Guerrero(energiaMaxima: Int,
                     raza: Raza) {
 
   def ejecutar(mov: Movimiento, enemigo: Guerrero): (Guerrero, Guerrero) = { //GAS: Lo cambio a guerrero, guerrero
-    estado match {
-      case Consciente                         => mov(this, enemigo)
-      case Inconsciente if mov == UsarSemilla => mov(this, enemigo)
-      case _                                  => (this, enemigo) //MUERTO NO PUEDE USAR SEMILLA
-    }
+    if (puedeEjecutarMovimiento(mov))
+      estado match {
+        case Consciente                         => mov(this, enemigo)
+        case Inconsciente if mov == UsarSemilla => mov(this, enemigo)
+        case _                                  => (this, enemigo) //MUERTO NO PUEDE USAR SEMILLA
+      }
+    else (this, enemigo)
   }
 
-  def puedeEjecutar(mov: Movimiento): Boolean = {
-    mov match {
-      case UsarSemilla => puedeUsarItem(Semilla)
-      case UsarArmaDeFuego => puedeUsarItem(Arma(DeFuego))
-      case _ => estado == Consciente
-    }
+  def puedeEjecutarMovimiento(mov: Movimiento): Boolean = {
+    if (movimientos.contains(mov))
+      mov match {
+        case UsarSemilla => puedeUsarItem(Semilla)
+        case UsarArmaDeFuego => puedeUsarItem(Arma(DeFuego))
+        case _ => estado == Consciente
+      }
+    else false
   }
 
+  def aprenderMovimiento(mov: Movimiento): Guerrero = {
+    if (!conoceMovimiento(mov))
+      copy(movimientos = mov :: movimientos)
+    else
+      this
+  }
 
+  def conoceMovimiento(mov: Movimiento): Boolean = movimientos.contains(mov)
 
   def alterarEstado(estadoNuevo: Estado): Guerrero = {
     estadoNuevo match {
@@ -98,7 +109,7 @@ case class Guerrero(energiaMaxima: Int,
     val resultados: List[(Movimiento, Int)] = for {
 
       //Por cada movimiento del guerrero
-      mov <- this.movimientos.filter(puedeEjecutar)
+      mov <- this.movimientos.filter(puedeEjecutarMovimiento)
 
       //ejecuto movimiento
       guerreroPostMov = this.ejecutar(mov, enemigo)
@@ -111,70 +122,69 @@ case class Guerrero(energiaMaxima: Int,
     //Ordeno por Mayor puntaje segun criterio y obtengo el primero
     if (resultados.isEmpty) DejarseFajar else resultados.sortBy(_._2).map(_._1).reverse.head
   }
+  def murio = (unGuerrero: Guerrero) => unGuerrero.estado == Muerto
 
-  def pelearRound(mov: Movimiento)(enemigo: Guerrero): (Guerrero, Guerrero, Option[Guerrero]) = {
+  def resultadoAtaque(guerrero: Guerrero, enemigo: Guerrero): ResultadoPelea = {
+    (murio(guerrero), murio(enemigo)) match {
+      case (_, true) => ResultadoPelea(guerrero, enemigo, Some(guerrero))
+      case (true, false) => ResultadoPelea(guerrero, enemigo, Some(enemigo))
+      case (false, false) => ResultadoPelea(guerrero, enemigo, None)
+    }
+  }
+
+  def pelearRound(mov: Movimiento)(enemigo: Guerrero): ResultadoPelea = {
     val (guerreroResultado, enemigoResultado) = ejecutar(mov, enemigo)
-    val (enemigoFinal, guerreroFinal) = enemigoResultado
-      .ejecutar(enemigoResultado
-      .movimientoMasEfectivoContra(guerreroResultado, DejarMasKi),
-      guerreroResultado)
-    if (enemigoFinal.estado == Muerto) {
-      (guerreroFinal, enemigoFinal, Some(guerreroFinal))
-    } else if (guerreroFinal.estado == Muerto) {
-      (guerreroFinal, enemigoFinal, Some(enemigoFinal))
-    } else {
-      (guerreroFinal, enemigoFinal, None)
+
+    resultadoAtaque(guerreroResultado, enemigoResultado) match {
+      case ResultadoPelea(_, _, Some(alguien)) => ResultadoPelea(guerreroResultado, enemigoResultado, Some(alguien))
+      case _ => val (enemigoFinal, guerreroFinal) = //el enemigo contraataca si no muere
+        enemigoResultado.ejecutar(enemigoResultado
+                        .movimientoMasEfectivoContra(guerreroResultado, DejarMasKi), guerreroResultado)
+
+        resultadoAtaque(guerreroFinal, enemigoFinal)
     }
   }
 
   def planDeAtaqueContra(enemigo: Guerrero, cantidadDeRounds: Int)(unCriterio: Criterio): Try[PlanDeAtaque] = {
     var movimientosElegidos: List[Movimiento] = Nil
-    var guerreros: (Guerrero, Guerrero, Option[Guerrero]) = (this, enemigo, None)      //Para facilitar trabajar con pelearRound en el Ciclo, guardo en esta variable los resultados paso a paso
+    var guerreros: ResultadoPelea = ResultadoPelea(this, enemigo, None)
+
     //Defino funciones para abstraer nombre a lo de arriba
-    def miGuerrero  =   guerreros._1
-    def elEnemigo   =   guerreros._2
+    def miGuerrero  =   guerreros.peleador
+    def elEnemigo   =   guerreros.enemigo
 
+    breakable {
+      for (roundActual <- 1 to cantidadDeRounds) {
+        //Elijo Movimiento mas efectivo
+        val mov = miGuerrero.movimientoMasEfectivoContra(elEnemigo, unCriterio)
 
-    for( roundActual <- 1 to cantidadDeRounds ){
-      //Elijo Movimiento mas efectivo
-       val mov = miGuerrero.movimientoMasEfectivoContra(elEnemigo, unCriterio)
-       //Simulo la Pelea y guardo los resultados
-       guerreros = miGuerrero.pelearRound(mov)(elEnemigo)
+        //Simulo la Pelea y guardo los resultados
+        guerreros = miGuerrero.pelearRound(mov)(elEnemigo)
 
-       //Podria hacerse alguna validacion antes de agregar el movimiento, si fuera necesario..
-       movimientosElegidos = movimientosElegidos union List(mov)
+        //Podria hacerse alguna validacion antes de agregar el movimiento, si fuera necesario..
+        movimientosElegidos = movimientosElegidos union List(mov)
+
+        if (guerreros.hayGanador)
+          break
+      }
     }
 
     Try {
       require(cantidadDeRounds == movimientosElegidos.size, "No se pudo completar el plan de ataque")
-      PlanDeAtaque(movimientosElegidos, cantidadDeRounds, unCriterio)
+      val plan = PlanDeAtaque(movimientosElegidos, cantidadDeRounds, unCriterio)
+      plan
     }
+
   }
 
   def pelearContra(enemigo:Guerrero)(plan:PlanDeAtaque):ResultadoPelea = {
 
-    /* IDEA SIN TERMINAR, me parece que hay que primero hacer Map de movimientos a pelearRound y hacer funcion
-     * Hay que ver como implementar que corte y no siga peleando si alguno murio..
-    //Uso Foldeo para realizar todos los rounds
-    val semilla:Movimiento =  plan.movimientos.head
-    //Necesito ayuda para componer los movimientos
-    val componerMovs: ((Movimiento,Movimiento) => Movimiento) = (mov:Movimiento, anterior:Movimiento) => (  mov( (g:Guerrero, e:Guerrero) => anterior(g,e)  )   )
+    var guerreros: ResultadoPelea = ResultadoPelea(this, enemigo, None)
 
-    var resultado:(Guerrero,Guerrero) = plan.movimientos.tail.foldLeft( semilla )( componerMovs )(this,enemigo)
-
-
-     *
-     */
-
-    var guerreros: (Guerrero, Guerrero, Option[Guerrero]) = (this, enemigo, None)      //Para facilitar trabajar con pelearRound en el Ciclo, guardo en esta variable los resultados paso a paso
-    //Defino funciones para abstraer nombre a lo de arriba
-    def miGuerrero  =   guerreros._1
-    def elEnemigo   =   guerreros._2
+    def miGuerrero = guerreros.peleador
+    def elEnemigo = guerreros.enemigo
 
     //Defino funciones auxiliares con Nombre Representativo
-    def murio = (unGuerrero:Guerrero) => unGuerrero.estado == Muerto
-    def algunoMurio = murio(miGuerrero) || murio(elEnemigo)
-
 
     //Para que pueda usar Break en el For
     breakable {
@@ -183,17 +193,14 @@ case class Guerrero(energiaMaxima: Int,
              val mov = miGuerrero.movimientoMasEfectivoContra(elEnemigo, plan.criterio)
              //Simulo la Pelea y guardo los resultados
              guerreros = miGuerrero.pelearRound(mov)(elEnemigo)
-             
+
              //Corto si Alguno Murio, el otro Gano
-             if(algunoMurio)
-               break
+             if (guerreros.hayGanador)
+            break
           }
     }
-    
-    ResultadoPelea(miGuerrero, elEnemigo, guerreros._3)
+    guerreros
   }
-  
-
 
 }
 
@@ -214,7 +221,9 @@ case class Saiyajin(cola: Boolean,
       case _    => this.copy(cola = false)
     }
   }
+
   def transformarEnMono = this.copy(transformacion = Mono)
+
   def transformarEnSuperSaiyajin = transformacion match {
     case saiyajin: SuperSaiyajin => this.copy(transformacion = SuperSaiyajin(saiyajin.nivel+1))
     case Normal => this.copy(transformacion = SuperSaiyajin(1))

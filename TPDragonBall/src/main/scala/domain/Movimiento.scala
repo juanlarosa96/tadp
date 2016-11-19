@@ -1,9 +1,7 @@
 package domain
 
 object TiposMovimientos {
-  //LEO: Debo devolver ambos guerreros porque hay algunos movimiento que modifican a los 2
   type Movimiento = (Guerrero, Guerrero) => (Guerrero, Guerrero)
-  //guerrero, enemigo(Gas: Lo puse como option para probar, antes era Guerrero)
 
   val DejarseFajar: Movimiento = {
     (guerrero: Guerrero, enemigo: Guerrero) =>
@@ -25,9 +23,6 @@ object TiposMovimientos {
       }
   }
 
-  //LEO: No se si lo vamos a usar, pero lo actualice
-  //val DejarseFajar: Movimiento = { (guerrero: Guerrero, enemigo: Guerrero) => guerrero }
-
   //TODO ver eso de cambiar el estado arbritariamente => en vez de pasasr algun estado a alterar estado, habria que tirar random
   val Magia: Movimiento = {
     (guerrero: Guerrero, enemigo: Guerrero) =>
@@ -38,14 +33,13 @@ object TiposMovimientos {
       }
   }
 
-  //GAS: falta chequear que el guerrero tenga el item en su inventario
   //GAS: delegar un poco en cada item (o aunque sea en arma)
 
-  val UsarSemilla: Movimiento = UsarItem(Semilla)
-  val UsarEspada: Movimiento = UsarItem(Arma(Filosa))
-  val UsarArmaDeFuego: Movimiento = UsarItem(Arma(DeFuego))
+  val UsarSemilla: Movimiento = usarItem(Semilla)
+  val UsarEspada: Movimiento = usarItem(Arma(Filosa))
+  val UsarArmaDeFuego: Movimiento = usarItem(Arma(DeFuego))
 
-  def UsarItem(item: Item)(guerrero: Guerrero, enemigo: Guerrero): (Guerrero, Guerrero) = {
+  def usarItem(item: Item)(guerrero: Guerrero, enemigo: Guerrero): (Guerrero, Guerrero) = {
     if (guerrero.puedeUsarItem(item)) {
       item match {
         case arma: Arma =>
@@ -97,11 +91,13 @@ object TiposMovimientos {
       }
   }
 
-  def Fusion(compañero: Guerrero)(guerrero: Guerrero, enemigo: Guerrero): (Guerrero, Guerrero) = {
+  //val FusionCon(compañero: Guerrero): (Guerrero, Guerrero) = fusion(compañero)(_,_)
+
+  def fusion(compañero: Guerrero, guerrero: Guerrero)(enemigo: Guerrero): (Guerrero, Guerrero) = {
     val guerreroFusionado =
       Guerrero(energiaMaxima = guerrero.energiaMaxima + compañero.energiaMaxima,
         energia = guerrero.energia + compañero.energia,
-        movimientos = guerrero.movimientos ::: compañero.movimientos,
+        movimientos = (guerrero.movimientos ::: compañero.movimientos).distinct,
         inventario = guerrero.inventario ::: compañero.inventario,
         estado = Consciente,
         roundsDejadoFajar = 0,
@@ -126,7 +122,7 @@ object TiposMovimientos {
       }
   }
 
-  def Onda(onda: Onda)(guerrero: Guerrero, enemigo: Guerrero): (Guerrero, Guerrero) = {
+  def onda(onda: Onda)(guerrero: Guerrero, enemigo: Guerrero): (Guerrero, Guerrero) = {
     onda match {
       case Genkidama if guerrero.roundsDejadoFajar > 1 => (guerrero, enemigo.recibirGolpeKi(math.pow(10, guerrero.roundsDejadoFajar).toInt))
       case ondaChica: OndaChica if guerrero.energia >= ondaChica.cantidadKiRequerida => (guerrero, enemigo.recibirGolpeKi(ondaChica.cantidadKiRequerida))
@@ -140,9 +136,11 @@ object TiposMovimientos {
   abstract class OndaChica extends Onda { val cantidadKiRequerida: Int }
   case object Kamehameha extends OndaChica { val cantidadKiRequerida = 100 }
   case object Dodonpa extends OndaChica { val cantidadKiRequerida = 20}
+  case object FinalFlash extends OndaChica { val cantidadKiRequerida = 150 }
 
-  val UsarGenkidama: Movimiento = Onda(Genkidama)
-  val UsarKamehameha: Movimiento = Onda(Kamehameha)
+  val UsarGenkidama: Movimiento = onda(Genkidama)
+  val UsarKamehameha: Movimiento = onda(Kamehameha)
+  val UsarFinalFlash: Movimiento = onda(FinalFlash)
 }
 
 
