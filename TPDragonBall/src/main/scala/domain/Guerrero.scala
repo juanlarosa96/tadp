@@ -2,6 +2,8 @@ package domain
 
 import domain.TiposMovimientos._
 import enums.TipoMonstruo._
+
+import scala.util.Try
 import scala.util.control.Breaks._
 
 
@@ -112,7 +114,10 @@ case class Guerrero(energiaMaxima: Int,
 
   def pelearRound(mov: Movimiento)(enemigo: Guerrero): (Guerrero, Guerrero, Option[Guerrero]) = {
     val (guerreroResultado, enemigoResultado) = ejecutar(mov, enemigo)
-    val (enemigoFinal, guerreroFinal) = enemigoResultado.ejecutar(enemigoResultado.movimientoMasEfectivoContra(guerreroResultado, DejarMasKi), guerreroResultado)
+    val (enemigoFinal, guerreroFinal) = enemigoResultado
+      .ejecutar(enemigoResultado
+      .movimientoMasEfectivoContra(guerreroResultado, DejarMasKi),
+      guerreroResultado)
     if (enemigoFinal.estado == Muerto) {
       (guerreroFinal, enemigoFinal, Some(guerreroFinal))
     } else if (guerreroFinal.estado == Muerto) {
@@ -122,7 +127,7 @@ case class Guerrero(energiaMaxima: Int,
     }
   }
 
-  def planDeAtaqueContra(enemigo: Guerrero, cantidadDeRounds: Int)(unCriterio: Criterio): PlanDeAtaque = {
+  def planDeAtaqueContra(enemigo: Guerrero, cantidadDeRounds: Int)(unCriterio: Criterio): Try[PlanDeAtaque] = {
     var movimientosElegidos: List[Movimiento] = Nil
     var guerreros: (Guerrero, Guerrero, Option[Guerrero]) = (this, enemigo, None)      //Para facilitar trabajar con pelearRound en el Ciclo, guardo en esta variable los resultados paso a paso
     //Defino funciones para abstraer nombre a lo de arriba
@@ -140,7 +145,10 @@ case class Guerrero(energiaMaxima: Int,
        movimientosElegidos = movimientosElegidos union List(mov)
     }
 
-    PlanDeAtaque(movimientosElegidos, cantidadDeRounds, unCriterio)
+    Try {
+      require(cantidadDeRounds == movimientosElegidos.size, "No se pudo completar el plan de ataque")
+      PlanDeAtaque(movimientosElegidos, cantidadDeRounds, unCriterio)
+    }
   }
 
   def pelearContra(enemigo:Guerrero)(plan:PlanDeAtaque):ResultadoPelea = {
@@ -172,7 +180,7 @@ case class Guerrero(energiaMaxima: Int,
     breakable {
           for( roundActual <- 1 to plan.cantidadRunds ){
             //Elijo Movimiento mas efectivo
-             var mov = miGuerrero.movimientoMasEfectivoContra(elEnemigo, plan.criterio)
+             val mov = miGuerrero.movimientoMasEfectivoContra(elEnemigo, plan.criterio)
              //Simulo la Pelea y guardo los resultados
              guerreros = miGuerrero.pelearRound(mov)(elEnemigo)
              
@@ -215,20 +223,7 @@ case class Saiyajin(cola: Boolean,
 
 }
 
-case class Monstruo(tipoMonstruo: TipoMonstruo) extends Raza {
-  /*
-  def comerseAlOponente(guerreroAComer: Guerrero) = { //TODO esta aca pq solo este movimiento lo hacen los mounstruos, por ahora no tiene sentido modelarlo afuera
-    tipoMonstruo match {
-      case TipoMonstruo.CELL =>
-        guerreroAComer match {
-          case morfi: Androide => this.copy(movimientos = this.movimientos ::: morfi.movimientos)
-          case _ => this
-        }
-      case TipoMonstruo.MAJIN_BUU => this.copy(movimientos = List(this.movimientos.reverse.head)) //TODO cambiar
-    }
-  }
-*/
-}
+case class Monstruo(tipoMonstruo: TipoMonstruo) extends Raza
 
 // ------------------------- ESTADOS DE VIDA --------------------------
 

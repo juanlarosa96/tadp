@@ -85,4 +85,14 @@ class MovimientosTest extends FlatSpec with Matchers with BeforeAndAfter {
   }
 */
 */
+
+  it should "plan de ataque falla" in {
+    val krillin  = Guerrero(100, 10, List(CargarKi), List(Semilla), Consciente, 0, Humano)
+    val piccolo = Guerrero(100, 20, List(GolpesNinja), Nil, Consciente, 0, Namekusein)
+
+    val planDeAtaque = piccolo.planDeAtaqueContra(krillin,1)(RealizarMasDanio)
+
+    assert(planDeAtaque.isSuccess)
+  }
+
 }
