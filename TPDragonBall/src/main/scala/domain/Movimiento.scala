@@ -57,7 +57,7 @@ object TiposMovimientos {
               (guerrero, enemigo.copy(estado = Inconsciente))
             case Filosa =>
               enemigo.raza match {
-                case saiyajin: Saiyajin if saiyajin.cola =>
+                case saiyajin: Saiyajin if saiyajin.transformacion == Mono =>
                   (guerrero, enemigo.alterarEstado(Inconsciente).copy(raza = saiyajin.cortarCola, energia = 1))
                 case otro =>
                   (guerrero, enemigo.cambiarEnergia(-(guerrero.energia / 100)))
