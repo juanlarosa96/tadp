@@ -16,13 +16,17 @@ case class Guerrero(energiaMaxima: Int,
                     raza: Raza) {
 
   def ejecutar(mov: Movimiento, enemigo: Guerrero): (Guerrero, Guerrero) = { //GAS: Lo cambio a guerrero, guerrero
-    if (puedeEjecutarMovimiento(mov))
+    if (puedeEjecutarMovimiento(mov)) {
+      var guerrero = this
+      if (mov != DejarseFajar) {
+        guerrero = this.copy(roundsDejadoFajar = 0)
+      }
       estado match {
-        case Consciente                         => mov(this, enemigo)
-        case Inconsciente if mov == UsarSemilla => mov(this, enemigo)
+        case Consciente                         => mov(guerrero, enemigo)
+        case Inconsciente if mov == UsarSemilla => mov(guerrero, enemigo)
         case _                                  => (this, enemigo) //MUERTO NO PUEDE USAR SEMILLA
       }
-    else (this, enemigo)
+    } else (this, enemigo)
   }
 
   def puedeEjecutarMovimiento(mov: Movimiento): Boolean = {
@@ -105,7 +109,7 @@ case class Guerrero(energiaMaxima: Int,
 
   def energiaMenorOIgualACero(valor: Int): Boolean = energia + valor <= 0
 
-  def movimientoMasEfectivoContra(enemigo: Guerrero, unCriterio: Criterio): Movimiento = {
+  def movimientoMasEfectivoContra(enemigo: Guerrero, unCriterio: Criterio): Option[Movimiento] = {
     val resultados: List[(Movimiento, Int)] = for {
 
       //Por cada movimiento del guerrero
@@ -120,7 +124,7 @@ case class Guerrero(energiaMaxima: Int,
     } yield (mov, valor)
 
     //Ordeno por Mayor puntaje segun criterio y obtengo el primero
-    if (resultados.isEmpty) DejarseFajar else resultados.sortBy(_._2).map(_._1).reverse.head
+    if (resultados.isEmpty) None else Some(resultados.sortBy(_._2).map(_._1).reverse.head)
   }
   def murio = (unGuerrero: Guerrero) => unGuerrero.estado == Muerto
 
@@ -138,9 +142,11 @@ case class Guerrero(energiaMaxima: Int,
     resultadoAtaque(guerreroResultado, enemigoResultado) match {
       case ResultadoPelea(_, _, Some(alguien)) => ResultadoPelea(guerreroResultado, enemigoResultado, Some(alguien))
       case _ => val (enemigoFinal, guerreroFinal) = //el enemigo contraataca si no muere
-        enemigoResultado.ejecutar(enemigoResultado
-                        .movimientoMasEfectivoContra(guerreroResultado, DejarMasKi), guerreroResultado)
-
+        if(enemigoResultado.movimientoMasEfectivoContra(guerreroResultado, DejarMasKi).isEmpty){
+           (guerreroResultado,enemigoResultado)
+        } else{            
+      enemigoResultado.ejecutar(enemigoResultado.movimientoMasEfectivoContra(guerreroResultado, DejarMasKi).get, guerreroResultado)
+        }
         resultadoAtaque(guerreroFinal, enemigoFinal)
     }
   }
@@ -157,15 +163,16 @@ case class Guerrero(energiaMaxima: Int,
       for (roundActual <- 1 to cantidadDeRounds) {
         //Elijo Movimiento mas efectivo
         val mov = miGuerrero.movimientoMasEfectivoContra(elEnemigo, unCriterio)
-
+        if (mov.isDefined){
         //Simulo la Pelea y guardo los resultados
-        guerreros = miGuerrero.pelearRound(mov)(elEnemigo)
+        guerreros = miGuerrero.pelearRound(mov.get)(elEnemigo)
 
         //Podria hacerse alguna validacion antes de agregar el movimiento, si fuera necesario..
-        movimientosElegidos = movimientosElegidos union List(mov)
-
+        movimientosElegidos = movimientosElegidos union List(mov.get)
+        
         if (guerreros.hayGanador)
           break
+        }
       }
     }
 
@@ -191,12 +198,14 @@ case class Guerrero(energiaMaxima: Int,
           for( roundActual <- 1 to plan.cantidadRunds ){
             //Elijo Movimiento mas efectivo
              val mov = miGuerrero.movimientoMasEfectivoContra(elEnemigo, plan.criterio)
+             if(mov.isDefined){
              //Simulo la Pelea y guardo los resultados
-             guerreros = miGuerrero.pelearRound(mov)(elEnemigo)
+             guerreros = miGuerrero.pelearRound(mov.get)(elEnemigo)
 
              //Corto si Alguno Murio, el otro Gano
              if (guerreros.hayGanador)
             break
+             }
           }
     }
     guerreros
