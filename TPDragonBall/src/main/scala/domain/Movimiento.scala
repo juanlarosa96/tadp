@@ -45,23 +45,11 @@ object TiposMovimientos {
         case arma: Arma =>
           arma.tipo match {
             case DeFuego =>
-                enemigo.raza match {
-                  case Humano =>
-                    (guerrero.consumirItem(Municion), enemigo.cambiarEnergia(-20))
-                  case Namekusein if enemigo.estado == Inconsciente =>
-                    (guerrero.consumirItem(Municion), enemigo.cambiarEnergia(-10))
-                  case otro =>
-                    (guerrero.consumirItem(Municion), enemigo)
-              }
+               DeFuego.atacar(guerrero, enemigo)
             case Roma if Roma.puedeBajar(enemigo) =>
               (guerrero, enemigo.copy(estado = Inconsciente))
             case Filosa =>
-              enemigo.raza match {
-                case saiyajin: Saiyajin if saiyajin.transformacion == Mono =>
-                  (guerrero, enemigo.alterarEstado(Inconsciente).copy(raza = saiyajin.cortarCola, energia = 1))
-                case otro =>
-                  (guerrero, enemigo.cambiarEnergia(-(guerrero.energia / 100)))
-              }
+              Filosa.atacar(guerrero, enemigo)             
             case otro =>(guerrero,enemigo)
           }
         case Semilla =>
