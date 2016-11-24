@@ -159,20 +159,35 @@ case class Guerrero(energiaMaxima: Int,
     def miGuerrero  =   guerreros.peleador
     def elEnemigo   =   guerreros.enemigo
 
+    
+    
     breakable {
       for (roundActual <- 1 to cantidadDeRounds) {
+        
+        
         //Elijo Movimiento mas efectivo
-        val mov = miGuerrero.movimientoMasEfectivoContra(elEnemigo, unCriterio)
+        val movim = miGuerrero.movimientoMasEfectivoContra(elEnemigo, unCriterio)
+        
+        /* VIEJO
         if (mov.isDefined){
         //Simulo la Pelea y guardo los resultados
         guerreros = miGuerrero.pelearRound(mov.get)(elEnemigo)
 
         //Podria hacerse alguna validacion antes de agregar el movimiento, si fuera necesario..
         movimientosElegidos = movimientosElegidos union List(mov.get)
+        */
+        
+        //TODO ver de usar desconstruccion de variables en asignacion...
+        var result = movim.map { mov => 
+                                (miGuerrero.pelearRound(mov)(elEnemigo)
+                                , movimientosElegidos union List(mov) 
+                                )};
+            
+        guerreros = result.get._1 
+        movimientosElegidos = result.get._2 
         
         if (guerreros.hayGanador)
           break
-        }
       }
     }
 

@@ -13,8 +13,6 @@ object TiposMovimientos {
       guerrero.raza match {
         case Saiyajin(cola, transformacion) =>
           transformacion match {
-            //TODO que error ?
-            //El ERROR dice que hay que diferenciar entre estados, no entre saiyayins y tiene razon, hay que implementar los estados de Saiyayin. No se quien lo estaba haciendo y si avanzo con eso
             case SuperSaiyajin(nivel) => (guerrero.cambiarEnergia(150 * nivel), None)
             case _ => (guerrero.cambiarEnergia(100), None)
           }
