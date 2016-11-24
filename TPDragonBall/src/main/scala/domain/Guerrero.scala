@@ -27,7 +27,7 @@ case class Guerrero(energiaMaxima: Int,
         case _                                  => (this, enemigo) //MUERTO NO PUEDE USAR SEMILLA
       }
     } else (this, enemigo)
-  }
+  } //TODO ---------> VER CAMBIO
 
   def puedeEjecutarMovimiento(mov: Movimiento): Boolean = {
     if (movimientos.contains(mov))
@@ -59,7 +59,7 @@ case class Guerrero(energiaMaxima: Int,
     }
 
     this.copy(estado = estadoNuevo)
-  }
+  } //TODO ---------> REVISAR
 
   def tieneItem(item: Item): Boolean = inventario.contains(item)
 
@@ -125,34 +125,49 @@ case class Guerrero(energiaMaxima: Int,
 
     //Ordeno por Mayor puntaje segun criterio y obtengo el primero
     if (resultados.isEmpty) None else Some(resultados.sortBy(_._2).map(_._1).reverse.head)
-  }
+  } //TODO ----> YA SE PASO A OPTION MOV (PROBAR)
 
-  def resultadoAtaque(guerrero: Guerrero, enemigo: Guerrero): ResultadoPelea = {
+  def resultadoAtaque(guerrero: Guerrero, enemigo: Guerrero): ResultadoAtaque = {
     (murio(guerrero), murio(enemigo)) match {
-      case (_, true) => ResultadoPelea(guerrero, enemigo, Some(guerrero))
-      case (true, false) => ResultadoPelea(guerrero, enemigo, Some(enemigo))
-      case (false, false) => ResultadoPelea(guerrero, enemigo, None)
+      case (_, true) => ResultadoAtaque(guerrero, enemigo, Some(guerrero))
+      case (true, false) => ResultadoAtaque(guerrero, enemigo, Some(enemigo))
+      case (false, false) => ResultadoAtaque(guerrero, enemigo, None)
     }
   }
 
-  def pelearRound(mov: Movimiento)(enemigo: Guerrero): ResultadoPelea = {
+/*
+  def pelearRound(mov: Movimiento)(enemigo: Guerrero): ResultadoAtaque = {
     val (guerreroResultado, enemigoResultado) = ejecutar(mov, enemigo)
 
     resultadoAtaque(guerreroResultado, enemigoResultado) match {
-      case ResultadoPelea(_, _, Some(alguien)) => ResultadoPelea(guerreroResultado, enemigoResultado, Some(alguien))
+      case ResultadoAtaque(_, _, Some(alguien)) => ResultadoAtaque(guerreroResultado, enemigoResultado, Some(alguien))
+      case _ => val (enemigoFinal, guerreroFinal) = //el enemigo contraataca si no muere
+        enemigoResultado.ejecutar(enemigoResultado
+          .movimientoMasEfectivoContra(guerreroResultado, DejarMasKi), guerreroResultado)
+
+        resultadoAtaque(guerreroFinal, enemigoFinal)
+    }
+  }
+*/
+
+  def pelearRound(mov: Movimiento)(enemigo: Guerrero): ResultadoAtaque = {
+    val (guerreroResultado, enemigoResultado) = ejecutar(mov, enemigo)
+
+    resultadoAtaque(guerreroResultado, enemigoResultado) match {
+      case ResultadoAtaque(_, _, Some(alguien)) => ResultadoAtaque(guerreroResultado, enemigoResultado, Some(alguien))
       case _ => val (enemigoFinal, guerreroFinal) = //el enemigo contraataca si no muere
         if(enemigoResultado.movimientoMasEfectivoContra(guerreroResultado, DejarMasKi).isEmpty){
-           (guerreroResultado,enemigoResultado)
-        } else{            
+           (enemigoResultado, guerreroResultado) //TODO LOS DEVUELVE COMO ESTABAN ------> (guerreroResultado, enemigoResultado) asi estaba y esta mal, es al reves
+        } else{
       enemigoResultado.ejecutar(enemigoResultado.movimientoMasEfectivoContra(guerreroResultado, DejarMasKi).get, guerreroResultado)
         }
         resultadoAtaque(guerreroFinal, enemigoFinal)
     }
-  }
+  } //TODO VER ESTO
 
   def planDeAtaqueContra(enemigo: Guerrero, cantidadDeRounds: Int)(unCriterio: Criterio): Try[PlanDeAtaque] = {
     var movimientosElegidos: List[Movimiento] = Nil
-    var guerreros: ResultadoPelea = ResultadoPelea(this, enemigo, None)
+    var guerreros: ResultadoAtaque = ResultadoAtaque(this, enemigo, None)
 
     //Defino funciones para abstraer nombre a lo de arriba
     def miGuerrero  =   guerreros.peleador
@@ -168,7 +183,7 @@ case class Guerrero(energiaMaxima: Int,
 
         //Podria hacerse alguna validacion antes de agregar el movimiento, si fuera necesario..
         movimientosElegidos = movimientosElegidos union List(mov.get)
-        
+
         if (guerreros.hayGanador)
           break
         }
@@ -183,9 +198,9 @@ case class Guerrero(energiaMaxima: Int,
 
   }
 
-  def pelearContra(enemigo:Guerrero)(plan:PlanDeAtaque):ResultadoPelea = {
+  def pelearContra(enemigo:Guerrero)(plan:PlanDeAtaque):ResultadoAtaque = {
 
-    var guerreros: ResultadoPelea = ResultadoPelea(this, enemigo, None)
+    var guerreros: ResultadoAtaque = ResultadoAtaque(this, enemigo, None)
 
     def miGuerrero = guerreros.peleador
     def elEnemigo = guerreros.enemigo
