@@ -88,10 +88,8 @@ case class Guerrero(energiaMaxima: Int,
     }
   }
 
-  //Usa Todas las esferas que tiene
   def usarEsferas: Guerrero = copy(inventario = inventario.filter(_ != Esfera))
 
-  //Creo metodo porque se esta repitiendo todo el tiempo lo mismo
   def cambiarEnergia(valor: Int): Guerrero = {
     if (sePasaDeEnergia(valor))
       copy(energia = energiaMaxima)
@@ -102,6 +100,8 @@ case class Guerrero(energiaMaxima: Int,
   }
 
   def sePasaDeEnergia(valor: Int): Boolean = energia + valor > energiaMaxima
+
+  def murio = (unGuerrero: Guerrero) => unGuerrero.estado == Muerto
 
   def energiaMenorOIgualACero(valor: Int): Boolean = energia + valor <= 0
 
@@ -122,7 +122,6 @@ case class Guerrero(energiaMaxima: Int,
     //Ordeno por Mayor puntaje segun criterio y obtengo el primero
     if (resultados.isEmpty) DejarseFajar else resultados.sortBy(_._2).map(_._1).reverse.head
   }
-  def murio = (unGuerrero: Guerrero) => unGuerrero.estado == Muerto
 
   def resultadoAtaque(guerrero: Guerrero, enemigo: Guerrero): ResultadoPelea = {
     (murio(guerrero), murio(enemigo)) match {

@@ -18,7 +18,9 @@ class MovimientosTest extends FlatSpec with Matchers with BeforeAndAfter {
     val krillinConsume = krillin.usarEsferas
 
     assertResult(true){
-      krillinConsume.inventario == List(Semilla)
+      krillinConsume.inventario == List(Semilla)//Es medio feucho porque tiene que elegir a todos los movimientos por igual mientras no lo maten.
+    //Le puse 5 si el movimiento si no lo mata y 0 si lo hace.
+
     }
   }
 
