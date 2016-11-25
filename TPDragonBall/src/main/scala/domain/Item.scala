@@ -29,13 +29,19 @@ case object DeFuego extends TipoArma {
     }
   }
 }
+
 case object Filosa extends TipoArma {
   def atacar(guerrero: Guerrero, enemigo: Guerrero): (Guerrero, Guerrero) = {
     enemigo.raza match {
-      case saiyajin: Saiyajin if saiyajin.transformacion == Mono =>
-        (guerrero, enemigo.alterarEstado(Inconsciente).copy(raza = saiyajin.cortarCola, energia = 1))
+      case saiyajin: Saiyajin if saiyajin.cola =>
+        saiyajin.transformacion match {
+          case Mono =>
+            (guerrero, enemigo.alterarEstado(Inconsciente).copy(raza = saiyajin.cortarCola, energia = 1))
+          case _ =>
+            (guerrero, enemigo.copy(raza = saiyajin.cortarCola, energia = 1))
+        }
       case otro =>
-        (guerrero, enemigo.cambiarEnergia(-(guerrero.energia / 100)))
+            (guerrero, enemigo.cambiarEnergia(-(guerrero.energia / 100)))
     }
   }
 }
