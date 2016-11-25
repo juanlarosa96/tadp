@@ -17,10 +17,10 @@ case class Guerrero(energiaMaxima: Int,
                     estado: Estado,  
                     raza: Raza) {
 
-  def ejecutar(mov: Movimiento, enemigo: Guerrero): (Guerrero, Guerrero) = { //GAS: Lo cambio a guerrero, guerrero
+  def ejecutar(mov: Movimiento, enemigo: Guerrero): (Guerrero, Guerrero) = {
     if (puedeEjecutarMovimiento(mov)) {
       if (mov == DejarseFajar || mov == UsarGenkidama)
-        mov(this, enemigo)
+        mov(this, enemigo) //TODO podria ser un case por mov
       else
         estado match {
           case Consciente                         => mov(this, enemigo)
@@ -29,7 +29,7 @@ case class Guerrero(energiaMaxima: Int,
           case _                                  => (this, enemigo) //MUERTO NO PUEDE USAR SEMILLA
         }
     } else (this, enemigo)
-  } //TODO ---------> VER CAMBIO
+  }
 
   def puedeEjecutarMovimiento(mov: Movimiento): Boolean = {
     if (movimientos.contains(mov))
@@ -142,21 +142,6 @@ case class Guerrero(energiaMaxima: Int,
     }
   }
 
-/*
-  def pelearRound(mov: Movimiento)(enemigo: Guerrero): ResultadoAtaque = {
-    val (guerreroResultado, enemigoResultado) = ejecutar(mov, enemigo)
-
-    resultadoAtaque(guerreroResultado, enemigoResultado) match {
-      case ResultadoAtaque(_, _, Some(alguien)) => ResultadoAtaque(guerreroResultado, enemigoResultado, Some(alguien))
-      case _ => val (enemigoFinal, guerreroFinal) = //el enemigo contraataca si no muere
-        enemigoResultado.ejecutar(enemigoResultado
-          .movimientoMasEfectivoContra(guerreroResultado, DejarMasKi), guerreroResultado)
-
-        resultadoAtaque(guerreroFinal, enemigoFinal)
-    }
-  }
-*/
-
   def pelearRound(mov: Movimiento)(enemigo: Guerrero): ResultadoAtaque = {
     val (guerreroResultado, enemigoResultado) = ejecutar(mov, enemigo)
 
@@ -190,7 +175,7 @@ case class Guerrero(energiaMaxima: Int,
 
     val resultadoAtaque: ResultadoAtaque = (1 to cantidadDeRounds).toList.foldLeft(guerreros){
                       (resultadoActual,_) =>
-                      val movim = miGuerrero.movimientoMasEfectivoContra(resultadoActual.enemigo, unCriterio)
+                      val movim = resultadoActual.peleador.movimientoMasEfectivoContra(resultadoActual.enemigo, unCriterio)
                       val result = movim.fold(resultadoActual) {  mov =>
                                             movimientosElegidos = movimientosElegidos union List(mov)
                                             resultadoActual.peleador.pelearRound(mov)(resultadoActual.enemigo)
@@ -200,7 +185,7 @@ case class Guerrero(energiaMaxima: Int,
     //Fin Fold
 
     Try {
-      require(cantidadDeRounds == movimientosElegidos.size || resultadoAtaque.ganador.isDefined, "No se pudo completar el plan de ataque")
+      require(cantidadDeRounds == movimientosElegidos.size || resultadoAtaque.ganador.contains(miGuerrero), "No se pudo completar el plan de ataque")
       val plan = PlanDeAtaque(movimientosElegidos, cantidadDeRounds, unCriterio)
       plan
     }.toOption
@@ -223,18 +208,18 @@ case class Guerrero(energiaMaxima: Int,
 
   }
 
-  def estadoRandom:Estado = {
-      var lista_temporal = List(Consciente, Muerto, Inconsciente);
-      lista_temporal( Random.nextInt(lista_temporal.size) )
+  def estadoRandom: Estado = {
+      val listaTemporal = List(Consciente, Muerto, Inconsciente)
+      listaTemporal(Random.nextInt(listaTemporal.size))
   }
-  
-  def alterarEstadoRandom() = this.alterarEstado( this.estadoRandom )
 
-  def morir:Guerrero = {
-                         this.raza match {
-                         case Fusion(guerreroOriginal,_) => guerreroOriginal.copy(energia = 0, estado = Muerto)
-                         case _ => copy(energia = 0, estado = Muerto)
-                         }
+  def alterarEstadoRandom: Guerrero = alterarEstado(estadoRandom)
+
+  def morir: Guerrero = {
+    this.raza match {
+      case Fusion(guerreroOriginal,_) => guerreroOriginal.copy(energia = 0, estado = Muerto)
+      case _ => copy(energia = 0, estado = Muerto)
+    }
   }
 
 }

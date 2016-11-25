@@ -90,7 +90,7 @@ class MovimientosTest extends FlatSpec with Matchers with BeforeAndAfter {
     }
   }
 
-
+  /*
   it should "Goku y Vegeta se fusionan" in {
     val goku = Guerrero(2000, 2000, List(GolpesNinja, UsarGenkidama, UsarKamehameha), Nil, DejandoseFajar(4), Saiyajin(cola = false, Normal))
     val vegeta = Guerrero(1000, 500, List(GolpesNinja, UsarGenkidama, UsarFinalFlash), Nil, DejandoseFajar(4), Saiyajin(cola = false, Normal))
@@ -105,6 +105,7 @@ class MovimientosTest extends FlatSpec with Matchers with BeforeAndAfter {
     assert(vegetto.estado == Consciente)
     assert(vegetto.raza == null)
   }
+*/
 
   //TODO pto 1
   it should "Persona elige un movimiento que deje mas ki" in {
@@ -126,7 +127,7 @@ class MovimientosTest extends FlatSpec with Matchers with BeforeAndAfter {
 
     val mejorMov = goku.movimientoMasEfectivoContra(vegeta, RealizarMasDanio)
 
-    assert(mejorMov.contains(UsarGenkidama)) //antes era genkidama, pero con el cambio en DejarseFajar ya no
+    assert(mejorMov.contains(UsarGenkidama))
   }
 
   //TODO pto 2
@@ -149,7 +150,7 @@ class MovimientosTest extends FlatSpec with Matchers with BeforeAndAfter {
 
     assert(round.ganador.contains(goku))
   }
-/*
+
   //TODO pto 3a
   it should "Yajirobe tiene su plan de ataque" in {
     val yajirobe = Guerrero(1000, 1000, List(CargarKi, UsarSemilla, GolpesNinja, UsarEspada), List(Arma(Filosa), Semilla), Consciente, Humano)
@@ -157,7 +158,6 @@ class MovimientosTest extends FlatSpec with Matchers with BeforeAndAfter {
 
     val planDeAtaqueDeYajirobe = yajirobe.planDeAtaqueContra(cell, 2)(DejarMasKi)
 
-    assert(planDeAtaqueDeYajirobe.isSuccess)
     assertResult(true){
       planDeAtaqueDeYajirobe.get.movimientos == List(UsarEspada, UsarSemilla) //IMPORTA EL ORDEN EN QUE SE GUARDAN LOS MOVIMIENTOS DE IGUAL VALOR PARA EL CRITERIO
     }
@@ -170,9 +170,10 @@ class MovimientosTest extends FlatSpec with Matchers with BeforeAndAfter {
 
     val planDeAtaqueDePiccolo = piccolo.planDeAtaqueContra(krillin, 3)(RealizarMasDanio)
 
-    assert(planDeAtaqueDePiccolo.isFailure) //Falla xque piccolo muere en el primer round, entonces el breakable lo saca
+    assert(planDeAtaqueDePiccolo.isEmpty)
   }
-*/
+
+
   //TODO pto 4
   it should "Goku pelea contra Vegeta y gana con Genkidama" in {
     val goku = Guerrero(2000, 2000, List(GolpesNinja, UsarGenkidama, UsarKamehameha), Nil, DejandoseFajar(4), Saiyajin(cola = false, Normal))
