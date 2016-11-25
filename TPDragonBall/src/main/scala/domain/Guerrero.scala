@@ -10,11 +10,11 @@ import scala.util.Random
 
 
 
-case class Guerrero(energiaMaxima: Int, 
-                    energia: Int, 
-                    movimientos: List[Movimiento], 
-                    inventario: List[Item], 
-                    estado: Estado, 
+case class Guerrero(energiaMaxima: Int,  
+                    energia: Int,  
+                    movimientos: List[Movimiento],  
+                    inventario: List[Item],  
+                    estado: Estado,  
                     raza: Raza) {
 
   def ejecutar(mov: Movimiento, enemigo: Guerrero): (Guerrero, Guerrero) = { //GAS: Lo cambio a guerrero, guerrero
@@ -104,7 +104,7 @@ case class Guerrero(energiaMaxima: Int,
     if (sePasaDeEnergia(valor))
       copy(energia = energiaMaxima)
     else if (energiaMenorOIgualACero(valor))
-      copy(energia = 0, estado = Muerto)
+      this.morir
     else
       copy(energia = energia + valor)
   }
@@ -224,11 +224,18 @@ case class Guerrero(energiaMaxima: Int,
   }
 
   def estadoRandom:Estado = {
-  var lista_temporal = List(Consciente, Muerto, Inconsciente);
-  lista_temporal( Random.nextInt(lista_temporal.size) )
-}
+      var lista_temporal = List(Consciente, Muerto, Inconsciente);
+      lista_temporal( Random.nextInt(lista_temporal.size) )
+  }
   
   def alterarEstadoRandom() = this.alterarEstado( this.estadoRandom )
+
+  def morir:Guerrero = {
+                         this.raza match {
+                         case Fusion(guerreroOriginal,_) => guerreroOriginal.copy(energia = 0, estado = Muerto)
+                         case _ => copy(energia = 0, estado = Muerto)
+                         }
+  }
 
 }
 
@@ -261,6 +268,8 @@ case class Saiyajin(cola: Boolean,
 }
 
 case class Monstruo(tipoMonstruo: TipoMonstruo) extends Raza
+
+case class Fusion(guerrero:Guerrero, companiero:Guerrero) extends Raza
 
 // ------------------------- ESTADOS DE VIDA --------------------------
 
