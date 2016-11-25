@@ -200,14 +200,14 @@ case class Guerrero(energiaMaxima: Int,
 
   def pelearContra(enemigo:Guerrero)(plan:PlanDeAtaque): ResultadoAtaque = {
 
-    var guerreros: ResultadoAtaque = ResultadoAtaque(this, enemigo, None) //TODO var o val ?
+    val guerreros: ResultadoAtaque = ResultadoAtaque(this, enemigo, None)
 
     def miGuerrero = guerreros.peleador
     def elEnemigo = guerreros.enemigo
 
     def func (guer: ResultadoAtaque, mov: Movimiento): ResultadoAtaque = {
-    guer.ganador.fold(guer: ResultadoAtaque) {_ =>
-      miGuerrero.pelearRound(mov)(elEnemigo)}
+    guer.ganador.fold(miGuerrero.pelearRound(mov)(elEnemigo)) {_ =>
+     guer }
     }
     plan.movimientos.foldLeft(guerreros){func}
 
