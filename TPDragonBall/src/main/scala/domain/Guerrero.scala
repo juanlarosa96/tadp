@@ -177,12 +177,12 @@ case class Guerrero(energiaMaxima: Int,
       (e1,_) =>
 
       val movim = miGuerrero.movimientoMasEfectivoContra(e1.enemigo, unCriterio)
-      val result = movim.map { mov =>
-        (miGuerrero.pelearRound(mov)(guerreros.enemigo)
-          , movimientosElegidos union List(mov)
+      val result = movim.fold(e1) {  mov =>
+        movimientosElegidos union List(mov)
+        (e1.peleador.pelearRound(mov)(e1.enemigo)       
           )}
 
-        result.get._1 //TODO cambiar esto si result devuelve None explotaaaa :(
+        result
     }
 
 //-----------Version viejaaa--------------------
