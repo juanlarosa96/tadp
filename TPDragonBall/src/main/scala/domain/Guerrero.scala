@@ -128,6 +128,7 @@ case class Guerrero(energiaMaxima: Int,
 
     //Ordeno por Mayor puntaje segun criterio y obtengo el primero
     Try(resultados.sortBy(_._2).map(_._1).reverse.head).toOption
+    //if (resultados.isEmpty) None else Some(resultados.sortBy(_._2).map(_._1).reverse.head)
   }
 
   def resultadoAtaque(guerrero: Guerrero, enemigo: Guerrero): ResultadoAtaque = {
@@ -169,48 +170,25 @@ case class Guerrero(energiaMaxima: Int,
   } //TODO VER ESTO
 
   def planDeAtaqueContra(enemigo: Guerrero, cantidadDeRounds: Int)(unCriterio: Criterio): Option[PlanDeAtaque] = {
-    val movimientosElegidos: List[Movimiento] = Nil
+    var movimientosElegidos: List[Movimiento] = Nil
     val guerreros: ResultadoAtaque = ResultadoAtaque(this, enemigo, None)
 
     //Defino funciones para abstraer nombre a lo de arriba
     def miGuerrero  =   guerreros.peleador
     def elEnemigo   =   guerreros.enemigo
-    //Ejemplo base List("1","2","3","4","5").foldLeft(0) { (e1,e2) => e1 + e2.toInt }
 
-    val resultadoAtaque :ResultadoAtaque = (1 to cantidadDeRounds).toList.foldLeft(guerreros){
+    val resultadoAtaque: ResultadoAtaque = (1 to cantidadDeRounds).toList.foldLeft(guerreros){
       (e1,_) =>
 
       val movim = miGuerrero.movimientoMasEfectivoContra(e1.enemigo, unCriterio)
       val result = movim.fold(e1) {  mov =>
-        movimientosElegidos union List(mov)
-        (e1.peleador.pelearRound(mov)(e1.enemigo)       
-          )}
+        movimientosElegidos = movimientosElegidos union List(mov)
+        e1.peleador.pelearRound(mov)(e1.enemigo)
+      }
 
         result
     }
 
-//-----------Version viejaaa--------------------
-  /*  breakable {
-      for (roundActual <- 1 to cantidadDeRounds) {
-        
-        
-        //Elijo Movimiento mas efectivo
-        val movim = miGuerrero.movimientoMasEfectivoContra(elEnemigo, unCriterio)
-
-        //TODO ver de usar desconstruccion de variables en asignacion...
-        val result = movim.map { mov =>
-                                (miGuerrero.pelearRound(mov)(elEnemigo)
-                                , movimientosElegidos union List(mov) 
-                                )}
-            
-        guerreros = result.get._1
-        movimientosElegidos = result.get._2 
-
-        if (guerreros.hayGanador)
-          break
-      }
-    } */
-//-----------------------------------------------------
     Try {
       require(cantidadDeRounds == movimientosElegidos.size || resultadoAtaque.ganador.isDefined, "No se pudo completar el plan de ataque")
       val plan = PlanDeAtaque(movimientosElegidos, cantidadDeRounds, unCriterio)
@@ -220,38 +198,19 @@ case class Guerrero(energiaMaxima: Int,
   }
 
 
-  def pelearContra(enemigo:Guerrero)(plan:PlanDeAtaque):ResultadoAtaque = {
+  def pelearContra(enemigo:Guerrero)(plan:PlanDeAtaque): ResultadoAtaque = {
 
-    var guerreros: ResultadoAtaque = ResultadoAtaque(this, enemigo, None)
+    var guerreros: ResultadoAtaque = ResultadoAtaque(this, enemigo, None) //TODO var o val ?
 
     def miGuerrero = guerreros.peleador
-    def elEnemigo = guerreros.enemigo    
-    def func (guer : ResultadoAtaque, mov : Movimiento) : ResultadoAtaque = {    
-    guer.ganador.fold(guer : ResultadoAtaque) {_ =>
+    def elEnemigo = guerreros.enemigo
+
+    def func (guer: ResultadoAtaque, mov: Movimiento): ResultadoAtaque = {
+    guer.ganador.fold(guer: ResultadoAtaque) {_ =>
       miGuerrero.pelearRound(mov)(elEnemigo)}
     }
     plan.movimientos.foldLeft(guerreros){func}
-    
 
-    //Defino funciones auxiliares con Nombre Representativo
-
-    //Para que pueda usar Break en el For
-   /* breakable {
-          for( roundActual <- 1 to plan.cantidadRunds ){
-            //Elijo Movimiento mas efectivo
-             val mov = miGuerrero.movimientoMasEfectivoContra(elEnemigo, plan.criterio)
-             if(mov.isDefined){
-             //Simulo la Pelea y guardo los resultados
-             guerreros = miGuerrero.pelearRound(mov.get)(elEnemigo)
-
-             //Corto si Alguno Murio, el otro Gano
-             if (guerreros.hayGanador)
-            break
-             }
-          }
-    }*/
-    
-    
   }
 
 }
