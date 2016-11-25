@@ -221,12 +221,18 @@ case class Guerrero(energiaMaxima: Int,
     var guerreros: ResultadoAtaque = ResultadoAtaque(this, enemigo, None)
 
     def miGuerrero = guerreros.peleador
-    def elEnemigo = guerreros.enemigo
+    def elEnemigo = guerreros.enemigo    
+    def func (guer : ResultadoAtaque, mov : Movimiento) : ResultadoAtaque = {    
+    guer.ganador.fold(guer : ResultadoAtaque) {_ =>
+      miGuerrero.pelearRound(mov)(elEnemigo)}
+    }
+    plan.movimientos.foldLeft(guerreros){func}
+    
 
     //Defino funciones auxiliares con Nombre Representativo
 
     //Para que pueda usar Break en el For
-    breakable {
+   /* breakable {
           for( roundActual <- 1 to plan.cantidadRunds ){
             //Elijo Movimiento mas efectivo
              val mov = miGuerrero.movimientoMasEfectivoContra(elEnemigo, plan.criterio)
@@ -239,8 +245,9 @@ case class Guerrero(energiaMaxima: Int,
             break
              }
           }
-    }
-    guerreros
+    }*/
+    
+    
   }
 
 }
