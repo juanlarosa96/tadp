@@ -10,7 +10,6 @@ import scala.util.control.Breaks._
 case class Guerrero(energiaMaxima: Int,
                     energia: Int,
                     movimientos: List[Movimiento],
-                    mejoresMovimientos: List[Movimiento],
                     inventario: List[Item],
                     estado: Estado,
                     raza: Raza) {
@@ -166,32 +165,24 @@ case class Guerrero(energiaMaxima: Int,
   } //TODO VER ESTO
 
   def planDeAtaqueContra(enemigo: Guerrero, cantidadDeRounds: Int)(unCriterio: Criterio): Option[PlanDeAtaque] = {
-    //val movimientosElegidos: List[Movimiento] = Nil
+    val movimientosElegidos: List[Movimiento] = Nil
     val guerreros: ResultadoAtaque = ResultadoAtaque(this, enemigo, None)
 
     //Defino funciones para abstraer nombre a lo de arriba
     def miGuerrero  =   guerreros.peleador
     def elEnemigo   =   guerreros.enemigo
-
     //Ejemplo base List("1","2","3","4","5").foldLeft(0) { (e1,e2) => e1 + e2.toInt }
 
-    val rounds = Seq(1,2,3,4,5)
-
-    val resultadoAtaque :ResultadoAtaque = rounds.foldLeft(guerreros){
-
+    val resultadoAtaque :ResultadoAtaque = (1 to cantidadDeRounds).toList.foldLeft(guerreros){
       (e1,_) =>
-        val movimientosElegidos: List[Movimiento] = e1.peleador.mejoresMovimientos
 
       val movim = miGuerrero.movimientoMasEfectivoContra(e1.enemigo, unCriterio)
-
       val result = movim.map { mov =>
         (miGuerrero.pelearRound(mov)(guerreros.enemigo)
           , movimientosElegidos union List(mov)
           )}
 
-        val peleadorConMovimientosCalculados = e1.peleador.copy( mejoresMovimientos = movimientosElegidos) //En vez de tener los mejores movimientos tirados po ahi
-        //hacemos que sea responsabilidad y conocimiento del guerrero saber cuales son
-        result.get._1.copy( peleador = peleadorConMovimientosCalculados ) //TODO cambiar esto si result devuelve None explotaaaa :(
+        result.get._1 //TODO cambiar esto si result devuelve None explotaaaa :(
     }
 
 //-----------Version viejaaa--------------------
@@ -217,8 +208,8 @@ case class Guerrero(energiaMaxima: Int,
     } */
 //-----------------------------------------------------
     Try {
-      require(cantidadDeRounds == resultadoAtaque.peleador.mejoresMovimientos.size, "No se pudo completar el plan de ataque")
-      val plan = PlanDeAtaque(resultadoAtaque.peleador.mejoresMovimientos, cantidadDeRounds, unCriterio)
+      require(cantidadDeRounds == movimientosElegidos.size || resultadoAtaque.ganador.isDefined, "No se pudo completar el plan de ataque")
+      val plan = PlanDeAtaque(movimientosElegidos, cantidadDeRounds, unCriterio)
       plan
     }.toOption
 
