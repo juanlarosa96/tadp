@@ -96,13 +96,13 @@ class MovimientosTest extends FlatSpec with Matchers with BeforeAndAfter {
     val vegeta = Guerrero(1000, 500, List(GolpesNinja, UsarGenkidama, UsarFinalFlash), Nil, DejandoseFajar(4), Saiyajin(cola = false, Normal))
     val super17 = Guerrero(4000, 3000, Nil, Nil, Consciente, Androide)
 
-    val vegetto = fusion(goku, vegeta)(super17)._1
+    val vegetto = fusion(vegeta)(goku)(super17)._1
 
     assert(vegetto.energiaMaxima == 3000)
     assert(vegetto.energia == 2500)
     assert(vegetto.inventario.isEmpty)
     assert(vegetto.estado == Consciente)
-    assert(vegetto.raza == Fusion(goku, vegeta))
+    assert(vegetto.raza == Fusion(vegeta, goku))
   }
 
 
@@ -111,7 +111,7 @@ class MovimientosTest extends FlatSpec with Matchers with BeforeAndAfter {
     val vegeta = Guerrero(1000, 500, List(GolpesNinja, UsarGenkidama, UsarFinalFlash), Nil, DejandoseFajar(4), Saiyajin(cola = false, Normal))
     val super17 = Guerrero(4000, 3000, Nil, Nil, Consciente, Androide)
 
-    val vegetto = fusion(goku, vegeta)(super17)._1
+    val vegetto = fusion(vegeta)(goku)(super17)._1
 
     val gokuDesfusionado = vegetto.morir
 

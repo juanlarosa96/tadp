@@ -216,11 +216,20 @@ case class Guerrero(energiaMaxima: Int,
 
   def morir: Guerrero = {
     this.raza match {
-      case Fusion(guerreroOriginal,_) => guerreroOriginal.copy(energia = 0, estado = Muerto)
+      case Fusion(_, guerreroOriginal) => guerreroOriginal.copy(energia = 0, estado = Muerto)
       case _ => copy(energia = 0, estado = Muerto)
     }
   }
 
+  def puedenFusionarseCon(companiero: Guerrero): Boolean = {
+    (this.raza, companiero.raza) match {
+      case (Monstruo(_), _) => false
+      case (Androide, _)    => false
+      case (_, Monstruo(_)) => false
+      case (_, Androide)    => false
+      case _                => true
+    }
+  }
 }
 
 // ------------------------------ TIPOS DE GUERRERO ------------------------------
@@ -253,7 +262,7 @@ case class Saiyajin(cola: Boolean,
 
 case class Monstruo(tipoMonstruo: TipoMonstruo) extends Raza
 
-case class Fusion(guerrero: Guerrero, companiero: Guerrero) extends Raza
+case class Fusion(companiero: Guerrero, guerrero: Guerrero) extends Raza
 
 // ------------------------- ESTADOS DE VIDA --------------------------
 
