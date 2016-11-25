@@ -192,7 +192,6 @@ case class Guerrero(energiaMaxima: Int,
 
   }
 
-
   def pelearContra(enemigo:Guerrero)(plan:PlanDeAtaque): ResultadoAtaque = {
 
     val guerreros: ResultadoAtaque = ResultadoAtaque(this, enemigo, None)
@@ -254,7 +253,7 @@ case class Saiyajin(cola: Boolean,
 
 case class Monstruo(tipoMonstruo: TipoMonstruo) extends Raza
 
-case class Fusion(guerrero:Guerrero, companiero:Guerrero) extends Raza
+case class Fusion(guerrero: Guerrero, companiero: Guerrero) extends Raza
 
 // ------------------------- ESTADOS DE VIDA --------------------------
 

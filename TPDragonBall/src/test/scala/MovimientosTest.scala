@@ -90,7 +90,7 @@ class MovimientosTest extends FlatSpec with Matchers with BeforeAndAfter {
     }
   }
 
-  /*
+
   it should "Goku y Vegeta se fusionan" in {
     val goku = Guerrero(2000, 2000, List(GolpesNinja, UsarGenkidama, UsarKamehameha), Nil, DejandoseFajar(4), Saiyajin(cola = false, Normal))
     val vegeta = Guerrero(1000, 500, List(GolpesNinja, UsarGenkidama, UsarFinalFlash), Nil, DejandoseFajar(4), Saiyajin(cola = false, Normal))
@@ -100,12 +100,23 @@ class MovimientosTest extends FlatSpec with Matchers with BeforeAndAfter {
 
     assert(vegetto.energiaMaxima == 3000)
     assert(vegetto.energia == 2500)
-    //assert(vegetto.movimientos == List(GolpesNinja, UsarGenkidama, UsarKamehameha, UsarFinalFlash)) no matchea este assert (xq?)
     assert(vegetto.inventario.isEmpty)
     assert(vegetto.estado == Consciente)
-    assert(vegetto.raza == null)
+    assert(vegetto.raza == Fusion(goku, vegeta))
   }
-*/
+
+  
+  it should "Vegetto muere y devuelve a Goku" in {
+    val goku = Guerrero(2000, 2000, List(GolpesNinja, UsarGenkidama, UsarKamehameha), Nil, DejandoseFajar(4), Saiyajin(cola = false, Normal))
+    val vegeta = Guerrero(1000, 500, List(GolpesNinja, UsarGenkidama, UsarFinalFlash), Nil, DejandoseFajar(4), Saiyajin(cola = false, Normal))
+    val super17 = Guerrero(4000, 3000, Nil, Nil, Consciente, Androide)
+
+    val vegetto = fusion(goku, vegeta)(super17)._1
+
+    val gokuDesfusionado = vegetto.morir
+
+    assert(gokuDesfusionado == goku.morir)
+  }
 
   //TODO pto 1
   it should "Persona elige un movimiento que deje mas ki" in {

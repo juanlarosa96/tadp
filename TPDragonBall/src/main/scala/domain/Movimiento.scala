@@ -105,7 +105,7 @@ object TiposMovimientos {
 
   //val FusionCon(compañero: Guerrero): (Guerrero, Guerrero) = fusion(compañero)(_,_)
 
-  def fusion(companiero: Guerrero, guerrero: Guerrero)(enemigo: Guerrero): (Guerrero, Guerrero) = {
+  def fusion(guerrero: Guerrero, companiero: Guerrero)(enemigo: Guerrero): (Guerrero, Guerrero) = {
     val guerreroFusionado =
       Guerrero(energiaMaxima = guerrero.energiaMaxima + companiero.energiaMaxima,
         energia = guerrero.energia + companiero.energia,
