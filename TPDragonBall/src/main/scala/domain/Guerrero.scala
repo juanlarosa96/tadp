@@ -33,7 +33,11 @@ case class Guerrero(energiaMaxima: Int,
       mov match {
         case UsarSemilla => puedeUsarItem(Semilla)
         case UsarArmaDeFuego => puedeUsarItem(Arma(DeFuego))
-        case _ => estado == Consciente
+        case _ => estado match {
+          case Consciente => true
+          case DejandoseFajar(_) => true
+          case _ => false
+        }
       }
     else false
   }
