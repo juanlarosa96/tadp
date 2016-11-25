@@ -12,20 +12,19 @@ case class Guerrero(energiaMaxima: Int,
                     movimientos: List[Movimiento],
                     inventario: List[Item],
                     estado: Estado,
-                    roundsDejadoFajar: Int,
                     raza: Raza) {
 
   def ejecutar(mov: Movimiento, enemigo: Guerrero): (Guerrero, Guerrero) = { //GAS: Lo cambio a guerrero, guerrero
     if (puedeEjecutarMovimiento(mov)) {
-      var guerrero = this
-      if (mov != DejarseFajar) {
-        guerrero = this.copy(roundsDejadoFajar = 0)
-      }
-      estado match {
-        case Consciente                         => mov(guerrero, enemigo)
-        case Inconsciente if mov == UsarSemilla => mov(guerrero, enemigo)
-        case _                                  => (this, enemigo) //MUERTO NO PUEDE USAR SEMILLA
-      }
+      if (mov == DejarseFajar || mov == UsarGenkidama)
+        mov(this, enemigo)
+      else
+        estado match {
+          case Consciente                         => mov(this, enemigo)
+          case Inconsciente if mov == UsarSemilla => mov(this, enemigo)
+          case DejandoseFajar(cant)               => mov(this.copy(estado = Consciente), enemigo)
+          case _                                  => (this, enemigo) //MUERTO NO PUEDE USAR SEMILLA
+        }
     } else (this, enemigo)
   } //TODO ---------> VER CAMBIO
 
@@ -53,8 +52,8 @@ case class Guerrero(energiaMaxima: Int,
       case Consciente => this.copy(estado = estadoNuevo)
       case _ =>
         raza match {
-          case Saiyajin(cola, _) => copy(raza = Saiyajin(cola, Normal), roundsDejadoFajar = 0) //cambio algo aca. QUE ES ESTO?
-          case _                 => copy(roundsDejadoFajar = 0)
+          case Saiyajin(cola, _) => copy(raza = Saiyajin(cola, Normal)) //cambio algo aca. QUE ES ESTO?
+          case _                 => this //????
         }
     }
 
@@ -173,20 +172,35 @@ case class Guerrero(energiaMaxima: Int,
     def miGuerrero  =   guerreros.peleador
     def elEnemigo   =   guerreros.enemigo
 
+    
+    
     breakable {
       for (roundActual <- 1 to cantidadDeRounds) {
+        
+        
         //Elijo Movimiento mas efectivo
-        val mov = miGuerrero.movimientoMasEfectivoContra(elEnemigo, unCriterio)
+        val movim = miGuerrero.movimientoMasEfectivoContra(elEnemigo, unCriterio)
+        
+        /* VIEJO
         if (mov.isDefined){
         //Simulo la Pelea y guardo los resultados
         guerreros = miGuerrero.pelearRound(mov.get)(elEnemigo)
 
         //Podria hacerse alguna validacion antes de agregar el movimiento, si fuera necesario..
         movimientosElegidos = movimientosElegidos union List(mov.get)
+        */
+        
+        //TODO ver de usar desconstruccion de variables en asignacion...
+        var result = movim.map { mov => 
+                                (miGuerrero.pelearRound(mov)(elEnemigo)
+                                , movimientosElegidos union List(mov) 
+                                )}
+            
+        guerreros = result.get._1 
+        movimientosElegidos = result.get._2 
 
         if (guerreros.hayGanador)
           break
-        }
       }
     }
 
@@ -264,7 +278,9 @@ trait Estado
 case object Consciente extends Estado
 case object Muerto extends Estado
 case object Inconsciente extends Estado
-
+case class DejandoseFajar(turnos: Int) extends Estado {
+  def resetear(g: Guerrero): Guerrero = g.copy(estado = Consciente)
+}
 // ------------------------- ESTADOS SAIYAN --------------------------
 
 trait Transformacion

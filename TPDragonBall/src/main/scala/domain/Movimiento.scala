@@ -5,7 +5,12 @@ object TiposMovimientos {
 
   val DejarseFajar: Movimiento = {
     (guerrero: Guerrero, enemigo: Guerrero) =>
-      (guerrero.copy(roundsDejadoFajar = guerrero.roundsDejadoFajar + 1), enemigo)
+      guerrero.estado match {
+        case DejandoseFajar(turnos) =>
+          (guerrero.copy(estado = DejandoseFajar(turnos + 1)), enemigo)
+        case _ =>
+          (guerrero.copy(estado = DejandoseFajar(1)), enemigo)
+      }
   }
 
   val CargarKi: Movimiento = {
@@ -13,8 +18,6 @@ object TiposMovimientos {
       guerrero.raza match {
         case Saiyajin(cola, transformacion) =>
           transformacion match {
-            //TODO que error ?
-            //El ERROR dice que hay que diferenciar entre estados, no entre saiyayins y tiene razon, hay que implementar los estados de Saiyayin. No se quien lo estaba haciendo y si avanzo con eso
             case SuperSaiyajin(nivel) => (guerrero.cambiarEnergia(150 * nivel), None)
             case _ => (guerrero.cambiarEnergia(100), None)
           }
@@ -88,7 +91,6 @@ object TiposMovimientos {
         movimientos = (guerrero.movimientos ::: compañero.movimientos).distinct,
         inventario = guerrero.inventario ::: compañero.inventario,
         estado = Consciente,
-        roundsDejadoFajar = 0,
         raza = null)
     (guerreroFusionado, enemigo)
   }
@@ -112,7 +114,11 @@ object TiposMovimientos {
 
   def onda(onda: Onda)(guerrero: Guerrero, enemigo: Guerrero): (Guerrero, Guerrero) = {
     onda match {
-      case Genkidama if guerrero.roundsDejadoFajar > 1 => (guerrero, enemigo.recibirGolpeKi(math.pow(10, guerrero.roundsDejadoFajar).toInt))
+      case Genkidama =>
+        guerrero.estado match {
+          case DejandoseFajar(cant) => (guerrero, enemigo.recibirGolpeKi(math.pow(10, cant).toInt))
+          case _ => (guerrero, enemigo.recibirGolpeKi(1)) //TODO xque la genkidama se eleva a la cant dejado fajar.. algo a la 0 = 1
+        }
       case ondaChica: OndaChica if guerrero.energia >= ondaChica.cantidadKiRequerida => (guerrero, enemigo.recibirGolpeKi(ondaChica.cantidadKiRequerida))
       case _ => (guerrero, enemigo)
     }
