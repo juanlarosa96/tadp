@@ -124,7 +124,7 @@ case class Guerrero(energiaMaxima: Int,
     } yield (mov, valor)
 
     //Ordeno por Mayor puntaje segun criterio y obtengo el primero
-    if (resultados.isEmpty) None else Some(resultados.sortBy(_._2).map(_._1).reverse.head)
+    Try(resultados.sortBy(_._2).map(_._1).reverse.head).toOption
   }
   def murio = (unGuerrero: Guerrero) => unGuerrero.estado == Muerto
 
@@ -151,51 +151,62 @@ case class Guerrero(energiaMaxima: Int,
     }
   }
 
-  def planDeAtaqueContra(enemigo: Guerrero, cantidadDeRounds: Int)(unCriterio: Criterio): Try[PlanDeAtaque] = {
-    var movimientosElegidos: List[Movimiento] = Nil
-    var guerreros: ResultadoPelea = ResultadoPelea(this, enemigo, None)
+  def planDeAtaqueContra(enemigo: Guerrero, cantidadDeRounds: Int)(unCriterio: Criterio): Option[PlanDeAtaque] = {
+    val movimientosElegidos: List[Movimiento] = Nil
+    val guerreros: ResultadoPelea = ResultadoPelea(this, enemigo, None)
 
     //Defino funciones para abstraer nombre a lo de arriba
     def miGuerrero  =   guerreros.peleador
     def elEnemigo   =   guerreros.enemigo
 
-    
-    
-    breakable {
+    //Ejemplo base List("1","2","3","4","5").foldLeft(0) { (e1,e2) => e1 + e2.toInt }
+
+    val rounds = Seq(1,2,3,4,5)
+
+    rounds.foldLeft(guerreros){
+
+      (e1,e2) =>
+      val movim = miGuerrero.movimientoMasEfectivoContra(e1.enemigo., unCriterio)
+
+      val result = movim.map { mov =>
+        (miGuerrero.pelearRound(mov)(guerreros.enemigo)
+          , movimientosElegidos union List(mov)
+          )}
+
+      result.get._1 //TODO si devuelve un None, esto explota, no se le puede hacer un get!!!!
+    }
+
+//-----------Version viejaaa--------------------
+  /*  breakable {
       for (roundActual <- 1 to cantidadDeRounds) {
         
         
         //Elijo Movimiento mas efectivo
         val movim = miGuerrero.movimientoMasEfectivoContra(elEnemigo, unCriterio)
-        
-        /* VIEJO
-        if (mov.isDefined){
-        //Simulo la Pelea y guardo los resultados
-        guerreros = miGuerrero.pelearRound(mov.get)(elEnemigo)
 
-        //Podria hacerse alguna validacion antes de agregar el movimiento, si fuera necesario..
-        movimientosElegidos = movimientosElegidos union List(mov.get)
-        */
-        
         //TODO ver de usar desconstruccion de variables en asignacion...
-        var result = movim.map { mov => 
+        val result = movim.map { mov =>
                                 (miGuerrero.pelearRound(mov)(elEnemigo)
                                 , movimientosElegidos union List(mov) 
-                                )};
+                                )}
             
-        guerreros = result.get._1 
+        guerreros = result.get._1
         movimientosElegidos = result.get._2 
         
         if (guerreros.hayGanador)
           break
       }
-    }
-
-    Try {
+    } */
+//-----------------------------------------------------
+    Option {
       require(cantidadDeRounds == movimientosElegidos.size, "No se pudo completar el plan de ataque")
       val plan = PlanDeAtaque(movimientosElegidos, cantidadDeRounds, unCriterio)
       plan
     }
+
+  }
+
+  def funcionDentroDelFold( guerreros: ResultadoPelea ) = {
 
   }
 
