@@ -1,5 +1,8 @@
 package domain
 
+import scala.util.Random
+
+
 object TiposMovimientos {
   type Movimiento = (Guerrero, Guerrero) => (Guerrero, Guerrero)
 
@@ -29,10 +32,28 @@ object TiposMovimientos {
   //TODO ver eso de cambiar el estado arbritariamente => en vez de pasasr algun estado a alterar estado, habria que tirar random
   val Magia: Movimiento = {
     (guerrero: Guerrero, enemigo: Guerrero) =>
+        
+      //Elige Arbitrariamente quien afecta y cual estado
+      def randomAlterar:(Guerrero,Guerrero) = {
+            var lista_temporal = List(guerrero, enemigo);
+            var guerreroSeleccionado:Guerrero = lista_temporal( Random.nextInt(lista_temporal.size) )
+            
+            //Me quedo feo lo de abajo, solamente quiero obtener el otro guerrero quitando de la lista el que ya seleccionamos
+            def elOtro:Guerrero = lista_temporal.filterNot { guerr => guerr == guerreroSeleccionado }.head;
+            
+            //Elige albitrariamente el estado
+            guerreroSeleccionado = guerreroSeleccionado.alterarEstadoRandom
+            
+            //Devuelvo los guerreros en el orden correcto
+            if(elOtro==guerrero)        ( elOtro              , guerreroSeleccionado)    //El guerrero seleccionado fue el 2do
+            else                        ( guerreroSeleccionado, elOtro)                  //El guerrero seleccionado fue el 1ero
+      }
+
+    
       guerrero.raza match {
-        case Namekusein => (guerrero.alterarEstado(Consciente), enemigo)
-        case monstruo: Monstruo => (guerrero.alterarEstado(Inconsciente), enemigo)
-        case _ if guerrero.tiene7Esferas => (guerrero.usarEsferas.alterarEstado(Consciente), enemigo)
+        case Namekusein => randomAlterar
+        case monstruo: Monstruo => randomAlterar
+        case _ if guerrero.tiene7Esferas => randomAlterar
       }
   }
 

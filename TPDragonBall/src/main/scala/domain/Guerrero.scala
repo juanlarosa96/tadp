@@ -6,12 +6,15 @@ import enums.TipoMonstruo._
 import scala.util.Try
 import scala.util.control.Breaks._
 
+import scala.util.Random
 
-case class Guerrero(energiaMaxima: Int,
-                    energia: Int,
-                    movimientos: List[Movimiento],
-                    inventario: List[Item],
-                    estado: Estado,
+
+
+case class Guerrero(energiaMaxima: Int, 
+                    energia: Int, 
+                    movimientos: List[Movimiento], 
+                    inventario: List[Item], 
+                    estado: Estado, 
                     raza: Raza) {
 
   def ejecutar(mov: Movimiento, enemigo: Guerrero): (Guerrero, Guerrero) = { //GAS: Lo cambio a guerrero, guerrero
@@ -158,14 +161,22 @@ case class Guerrero(energiaMaxima: Int,
     val (guerreroResultado, enemigoResultado) = ejecutar(mov, enemigo)
 
     resultadoAtaque(guerreroResultado, enemigoResultado) match {
-      case ResultadoAtaque(_, _, Some(alguien)) => ResultadoAtaque(guerreroResultado, enemigoResultado, Some(alguien))
-      case _ => val (enemigoFinal, guerreroFinal) = //el enemigo contraataca si no muere
-        if(enemigoResultado.movimientoMasEfectivoContra(guerreroResultado, DejarMasKi).isEmpty){
-           (enemigoResultado, guerreroResultado) //TODO LOS DEVUELVE COMO ESTABAN ------> (guerreroResultado, enemigoResultado) asi estaba y esta mal, es al reves
-        } else{
-      enemigoResultado.ejecutar(enemigoResultado.movimientoMasEfectivoContra(guerreroResultado, DejarMasKi).get, guerreroResultado)
-        }
-        resultadoAtaque(guerreroFinal, enemigoFinal)
+        //Si hubo un ganador
+        case ResultadoAtaque(_, _, Some(alguien)) => ResultadoAtaque(guerreroResultado, enemigoResultado, Some(alguien))
+        
+        //el enemigo contraataca si no muere
+        case _ => val (enemigoFinal, guerreroFinal) = 
+           
+          //Si no hay movimiento mas efectivo los devuelve como estaban
+          if(enemigoResultado.movimientoMasEfectivoContra(guerreroResultado, DejarMasKi).isEmpty){
+               (enemigoResultado, guerreroResultado) 
+          //Si hay movimiento, lo ejecuta     
+          } else{
+              enemigoResultado.ejecutar(enemigoResultado.movimientoMasEfectivoContra(guerreroResultado, DejarMasKi).get, guerreroResultado)
+          }
+        
+          //Armo Resultado Final
+          resultadoAtaque(guerreroFinal, enemigoFinal)
     }
   } //TODO VER ESTO
 
@@ -178,16 +189,15 @@ case class Guerrero(energiaMaxima: Int,
     def elEnemigo   =   guerreros.enemigo
 
     val resultadoAtaque: ResultadoAtaque = (1 to cantidadDeRounds).toList.foldLeft(guerreros){
-      (e1,_) =>
-
-      val movim = miGuerrero.movimientoMasEfectivoContra(e1.enemigo, unCriterio)
-      val result = movim.fold(e1) {  mov =>
-        movimientosElegidos = movimientosElegidos union List(mov)
-        e1.peleador.pelearRound(mov)(e1.enemigo)
-      }
-
-        result
-    }
+                      (resultadoActual,_) =>
+                      val movim = miGuerrero.movimientoMasEfectivoContra(resultadoActual.enemigo, unCriterio)
+                      val result = movim.fold(resultadoActual) {  mov =>
+                                            movimientosElegidos = movimientosElegidos union List(mov)
+                                            resultadoActual.peleador.pelearRound(mov)(resultadoActual.enemigo)
+                                          }
+                      result
+                    }
+    //Fin Fold
 
     Try {
       require(cantidadDeRounds == movimientosElegidos.size || resultadoAtaque.ganador.isDefined, "No se pudo completar el plan de ataque")
@@ -205,13 +215,20 @@ case class Guerrero(energiaMaxima: Int,
     def miGuerrero = guerreros.peleador
     def elEnemigo = guerreros.enemigo
 
-    def func (guer: ResultadoAtaque, mov: Movimiento): ResultadoAtaque = {
-    guer.ganador.fold(miGuerrero.pelearRound(mov)(elEnemigo)) {_ =>
-     guer }
-    }
-    plan.movimientos.foldLeft(guerreros){func}
+    def funcion_para_foldear (guer: ResultadoAtaque, mov: Movimiento): ResultadoAtaque = {
+                    guer.ganador.fold(miGuerrero.pelearRound(mov)(elEnemigo)) {
+                                          _ => guer }
+                    }
+    plan.movimientos.foldLeft(guerreros){funcion_para_foldear}
 
   }
+
+  def estadoRandom:Estado = {
+  var lista_temporal = List(Consciente, Muerto, Inconsciente);
+  lista_temporal( Random.nextInt(lista_temporal.size) )
+}
+  
+  def alterarEstadoRandom() = this.alterarEstado( this.estadoRandom )
 
 }
 
