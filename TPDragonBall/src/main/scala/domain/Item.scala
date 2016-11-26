@@ -1,6 +1,3 @@
-/**
- * Created by gas on 29/10/16.
- */
 package domain
 
 abstract class Item
