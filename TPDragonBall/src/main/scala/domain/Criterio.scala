@@ -14,7 +14,7 @@ case object RealizarMasDanio extends Criterio {
 case object DejarMasKi extends Criterio {
   def apply(guerreroFinal: Guerrero, enemigoFinal: Guerrero): Int = {
     //Devuelvo simplemente el KI, porque luego se ordenara por mayor Ki
-    guerreroFinal.energia
+    guerreroFinal.energia - enemigoFinal.energia
   }
 }
 

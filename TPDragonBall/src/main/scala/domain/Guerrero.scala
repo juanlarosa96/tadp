@@ -199,11 +199,11 @@ case class Guerrero(energiaMaxima: Int,
     def miGuerrero = guerreros.peleador
     def elEnemigo = guerreros.enemigo
 
-    def funcion_para_foldear (guer: ResultadoAtaque, mov: Movimiento): ResultadoAtaque = {
+    def funcionParaFoldear (guer: ResultadoAtaque, mov: Movimiento): ResultadoAtaque = {
                     guer.ganador.fold(miGuerrero.pelearRound(mov)(elEnemigo)) {
                                           _ => guer }
                     }
-    plan.movimientos.foldLeft(guerreros){funcion_para_foldear}
+    plan.movimientos.foldLeft(guerreros){funcionParaFoldear}
 
   }
 

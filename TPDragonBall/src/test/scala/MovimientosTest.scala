@@ -132,6 +132,17 @@ class MovimientosTest extends FlatSpec with Matchers with BeforeAndAfter {
   }
 
 
+  it should "Guerrero elige mov que deje con mas ki que el enemigo" in {
+
+    val goku  = Guerrero(1000, 900, List(UsarSemilla, CargarKi, UsarFinalFlash), List(Semilla), Consciente, Humano)
+    val vegeta = Guerrero(1000, 800, Nil, Nil, Consciente, Humano)
+
+    val mejorMov = goku.movimientoMasEfectivoContra(vegeta, DejarMasKi)
+
+    assert(mejorMov.contains(UsarFinalFlash))
+  }
+
+
   it should "Persona elige movimiento que mas pegue" in {
     val goku = Guerrero(2000, 2000, List(GolpesNinja, UsarGenkidama, UsarKamehameha, CargarKi), Nil, DejandoseFajar(4), Saiyajin(cola = false, Normal))
     val vegeta = Guerrero(3000, 3000, Nil, Nil, Consciente, Saiyajin(cola = false, Normal))
