@@ -139,8 +139,8 @@ object TiposMovimientos {
     onda match {
       case Genkidama =>
         guerrero.estado match {
-          case DejandoseFajar(cant) => (guerrero, enemigo.recibirGolpeKi(math.pow(10, cant).toInt))
-          case _ => (guerrero, enemigo.recibirGolpeKi(1)) //TODO xque la genkidama se eleva a la cant dejado fajar.. algo a la 0 = 1
+          case DejandoseFajar(cant) => (guerrero.alterarEstado(Consciente), enemigo.recibirGolpeKi(math.pow(10, cant).toInt))
+          case _ => (guerrero.alterarEstado(Consciente), enemigo.recibirGolpeKi(1)) //TODO xque la genkidama se eleva a la cant dejado fajar.. algo a la 0 = 1
         }
       case ondaChica: OndaChica if guerrero.energia >= ondaChica.cantidadKiRequerida => (guerrero, enemigo.recibirGolpeKi(ondaChica.cantidadKiRequerida))
       case _ => (guerrero, enemigo)

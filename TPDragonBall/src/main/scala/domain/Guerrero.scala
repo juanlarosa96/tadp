@@ -148,18 +148,18 @@ case class Guerrero(energiaMaxima: Int,
     resultadoAtaque(guerreroResultado, enemigoResultado) match {
         //Si hubo un ganador
         case ResultadoAtaque(_, _, Some(alguien)) => ResultadoAtaque(guerreroResultado, enemigoResultado, Some(alguien))
-        
+
         //el enemigo contraataca si no muere
-        case _ => val (enemigoFinal, guerreroFinal) = 
-           
+        case _ => val (enemigoFinal, guerreroFinal) =
+
           //Si no hay movimiento mas efectivo los devuelve como estaban
           if(enemigoResultado.movimientoMasEfectivoContra(guerreroResultado, DejarMasKi).isEmpty){
-               (enemigoResultado, guerreroResultado) 
-          //Si hay movimiento, lo ejecuta     
+               (enemigoResultado, guerreroResultado)
+          //Si hay movimiento, lo ejecuta
           } else{
               enemigoResultado.ejecutar(enemigoResultado.movimientoMasEfectivoContra(guerreroResultado, DejarMasKi).get, guerreroResultado)
           }
-        
+
           //Armo Resultado Final
           resultadoAtaque(guerreroFinal, enemigoFinal)
     }
@@ -173,22 +173,26 @@ case class Guerrero(energiaMaxima: Int,
     def miGuerrero  =   guerreros.peleador
     def elEnemigo   =   guerreros.enemigo
 
-    val resultadoAtaque: ResultadoAtaque = (1 to cantidadDeRounds).toList.foldLeft(guerreros){
+    val resultadoUnAtaque: ResultadoAtaque = (1 to cantidadDeRounds).toList.foldLeft(guerreros){
                       (resultadoActual,_) =>
-                      val movim = resultadoActual.peleador.movimientoMasEfectivoContra(resultadoActual.enemigo, unCriterio)
-                      val result = movim.fold(resultadoActual) {  mov =>
-                                            movimientosElegidos = movimientosElegidos union List(mov)
-                                            resultadoActual.peleador.pelearRound(mov)(resultadoActual.enemigo)
-                                          }
-                      result
-                    }
-    //Fin Fold
+                      val movim = if (murio(resultadoActual.enemigo)) None
+                      else
+                        resultadoActual.peleador.movimientoMasEfectivoContra(resultadoActual.enemigo, unCriterio)
+                      val result =  movim match {
+                        case None => resultadoAtaque(resultadoActual.peleador, resultadoActual.enemigo)
+                        case Some(mov) =>
+                          movimientosElegidos = movimientosElegidos union List(mov)
+                          resultadoActual.peleador.pelearRound(mov)(resultadoActual.enemigo)
+                      }
+                        result  //este puede devolver un ganador, lo que quiere decir que un guerrero murio. Si es el mio,
+                    }         //la prox no voy a tener movMasEfectivo, por lo que movim va a ser None, por lo que el movim.fold falla
+    //Fin Fold                //Si murio el otro, sigo llenando movElegidos xque le sigo pegando
 
     Try {
-      require(cantidadDeRounds == movimientosElegidos.size || resultadoAtaque.ganador.contains(miGuerrero), "No se pudo completar el plan de ataque")
-      val plan = PlanDeAtaque(movimientosElegidos, cantidadDeRounds, unCriterio)
-      plan
-    }.toOption
+      require(cantidadDeRounds == movimientosElegidos.size || resultadoUnAtaque.ganador.contains(resultadoUnAtaque.peleador), "No se pudo completar el plan de ataque")
+      val plan = PlanDeAtaque(movimientosElegidos, cantidadDeRounds, unCriterio)  //la verificacion de resultadoAtaque.ganador.. esta al pedo xq
+      plan                                                                        //la unica manera de que movElegidos.size sea != de cantRounds es
+    }.toOption                                                                    //si gano el otro wachin
 
   }
 
